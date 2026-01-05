@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Viva Comigo</string>
+    <string name="widget_name">Foto Compartilhada</string>
+    <string name="widget_description">Compartilhe fotos com quem você ama</string>
+
+    <!-- Auth -->
+    <string name="email">Email</string>
+    <string name="password">Senha</string>
+    <string name="login">Entrar</string>
+    <string name="register">Registrar</string>
+    <string name="logout">Sair</string>
+
+    <!-- Pairing -->
+    <string name="your_code">Seu código</string>
+    <string name="partner_code">Código do parceiro</string>
+    <string name="pair">Parear</string>
+    <string name="paired_with">Pareado com</string>
+    <string name="share_code">Compartilhe este código com seu parceiro</string>
+    <string name="enter_partner_code">Digite o código do seu parceiro</string>
+
+    <!-- Photos -->
+    <string name="select_photo">Selecionar Foto</string>
+    <string name="take_photo">Tirar Foto</string>
+    <string name="send_photo">Enviar Foto</string>
+    <string name="loading">Carregando…</string>
+    <string name="no_photo">Nenhuma foto ainda</string>
+    <string name="tap_to_add">Toque para adicionar uma foto</string>
+</resources>
