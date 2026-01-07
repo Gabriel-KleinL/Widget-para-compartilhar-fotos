@@ -2,176 +2,359 @@
 
 **Viva Comigo** é um aplicativo Android que permite compartilhar fotos especiais com alguém que você ama através de um widget na tela inicial.
 
+> 🤖 **Para IA**: Antes de modificar qualquer código, leia [`AI_CONTEXT.md`](AI_CONTEXT.md) para entender a arquitetura e padrões do projeto!
+
 ## 📱 Funcionalidades
 
-- 🔐 **Autenticação segura** com Firebase Authentication
-- 👥 **Sistema de pareamento** simples com código de 6 dígitos
+- 👥 **Sistema de pareamento** simples com código de 6 dígitos (sem necessidade de login)
 - 📸 **Envio de fotos** diretamente para o widget do parceiro
-- 🖼️ **Widget na tela inicial** que exibe a última foto recebida
-- 🔄 **Sincronização automática** em tempo real
-- 💾 **Armazenamento seguro** no Firebase Storage
+- 🖼️ **Widget na tela inicial** que exibe a última foto recebida em tempo real
+- 🔄 **Sincronização automática** via polling (30s) e background sync (30min)
+- 💾 **Armazenamento** em MySQL remoto com imagens em BLOB
 
-## 🏗️ Arquitetura
+## 🏗️ Tecnologias
 
-O app utiliza as seguintes tecnologias modernas do Android:
-
-- **Kotlin** - Linguagem de programação
-- **Jetpack Compose** - UI declarativa moderna
-- **Material 3** - Design system
-- **Firebase**:
-  - Authentication - Autenticação de usuários
-  - Firestore - Banco de dados em tempo real
-  - Storage - Armazenamento de imagens
-- **Glance** - Framework para Widgets
-- **Coil** - Carregamento de imagens
+### Android App
+- **Kotlin 1.9.20** - Linguagem de programação
+- **Jetpack Compose** - UI declarativa moderna com Material 3
+- **MVVM** - Arquitetura Model-View-ViewModel
+- **Glance** - Framework para Widgets modernos
+- **Coil** - Carregamento de imagens assíncrono
 - **WorkManager** - Sincronização em background
-- **Coroutines & Flow** - Programação assíncrona
+- **StateFlow** - Gerenciamento de estado reativo
+- **MySQL JDBC** - Conexão direta ao banco de dados
+- **DataStore** - Cache local de usuário
 
-## 🚀 Como configurar
+### Backend (Opcional)
+- **Node.js + Express** - API REST
+- **JWT** - Autenticação
+- **MySQL2** - Driver MySQL para Node.js
+- **Multer** - Upload de arquivos
 
-### 1. Pré-requisitos
+### Banco de Dados
+- **MySQL 8** - Banco de dados relacional
+- **Tabelas**: `users`, `photos`
+- **Storage**: BLOB para imagens (até 10MB)
 
+## 📚 Documentação
+
+### Para Desenvolvedores (Humanos)
+- **[SETUP.md](SETUP.md)** - Guia completo de instalação e configuração
+- **[README.md](README.md)** - Este arquivo (visão geral do projeto)
+
+### Para IA/Agentes de Código
+- **[AI_CONTEXT.md](AI_CONTEXT.md)** - ⭐ **LEIA PRIMEIRO!** Contexto rápido do projeto
+- **[.claude/ARCHITECTURE.md](.claude/ARCHITECTURE.md)** - Arquitetura detalhada, fluxos e diagramas
+- **[.claude/CODE_GUIDE.md](.claude/CODE_GUIDE.md)** - Guia prático de como modificar código
+- **[.claude/COMPONENTS.md](.claude/COMPONENTS.md)** - Documentação de cada componente
+- **[.claude/DATABASE.md](.claude/DATABASE.md)** - Schema do banco e queries comuns
+
+## 🚀 Quick Start
+
+### Pré-requisitos
 - Android Studio Hedgehog ou superior
-- JDK 8 ou superior
-- Conta no Firebase
+- JDK 11 ou superior
+- MySQL 8 (local ou remoto)
+- Node.js 18+ (opcional, para backend)
 
-### 2. Configurar o Firebase
+### Instalação Rápida
 
-1. Acesse o [Firebase Console](https://console.firebase.google.com/)
-2. Crie um novo projeto ou use um existente
-3. Adicione um app Android ao projeto:
-   - Package name: `com.vivacomigo.app`
-   - Download do arquivo `google-services.json`
-4. Coloque o arquivo `google-services.json` na pasta `app/`
-
-5. No Firebase Console, ative os seguintes serviços:
-
-   **Authentication:**
-   - Acesse "Authentication" > "Sign-in method"
-   - Ative "Email/Password"
-
-   **Firestore Database:**
-   - Acesse "Firestore Database"
-   - Crie um banco de dados em modo "production"
-   - Configure as regras de segurança:
-
-   ```
-   rules_version = '2';
-   service cloud.firestore {
-     match /databases/{database}/documents {
-       match /users/{userId} {
-         allow read, write: if request.auth != null && request.auth.uid == userId;
-         allow read: if request.auth != null;
-       }
-
-       match /photos/{photoId} {
-         allow create: if request.auth != null;
-         allow read: if request.auth != null &&
-           (resource.data.senderId == request.auth.uid ||
-            resource.data.receiverId == request.auth.uid);
-       }
-     }
-   }
-   ```
-
-   **Storage:**
-   - Acesse "Storage"
-   - Configure as regras de segurança:
-
-   ```
-   rules_version = '2';
-   service firebase.storage {
-     match /b/{bucket}/o {
-       match /photos/{photoId} {
-         allow read: if request.auth != null;
-         allow write: if request.auth != null;
-       }
-     }
-   }
-   ```
-
-### 3. Compilar e executar
-
-1. Clone o repositório:
+1. **Clone o repositório:**
    ```bash
    git clone https://github.com/Gabriel-KleinL/Widget-para-compartilhar-fotos.git
    cd Widget-para-compartilhar-fotos
    ```
 
-2. Abra o projeto no Android Studio
+2. **Configure o banco de dados:**
+   ```bash
+   cd backend
+   mysql -u root -p < database/schema.sql
+   ```
 
-3. Certifique-se de que o arquivo `google-services.json` está em `app/`
+3. **Configure as credenciais:**
 
-4. Sincronize o Gradle (Build > Sync Project with Gradle Files)
+   Edite `app/src/main/java/com/vivacomigo/app/data/database/DatabaseConfig.kt`:
+   ```kotlin
+   const val HOST = "seu-host-mysql"
+   const val PORT = 3306
+   const val USER = "seu-usuario"
+   const val PASSWORD = "sua-senha"
+   const val DATABASE = "nome-do-banco"
+   ```
 
-5. Execute o app em um dispositivo ou emulador Android (API 26+)
+4. **Build e execute:**
+   ```bash
+   ./gradlew installDebug
+   ```
 
-## 📖 Como usar
+Para instruções detalhadas, consulte [SETUP.md](SETUP.md).
 
-1. **Registro/Login:**
-   - Abra o app e crie uma conta com email e senha
-   - Ou faça login se já tiver uma conta
+## 📖 Como Usar
 
-2. **Pareamento:**
-   - Após o login, você verá seu código de pareamento de 6 dígitos
-   - Compartilhe este código com seu parceiro
-   - Digite o código do seu parceiro para conectar
+### 1. Pareamento
 
-3. **Enviar fotos:**
-   - Na tela principal, toque no botão "+"
-   - Selecione uma foto da galeria
-   - A foto será enviada para o widget do seu parceiro
-
-4. **Widget:**
-   - Pressione e segure na tela inicial do Android
-   - Toque em "Widgets"
-   - Encontre "Viva Comigo - Foto Compartilhada"
-   - Arraste para a tela inicial
-   - O widget mostrará a última foto recebida
-
-## 🔧 Estrutura do projeto
-
+**No dispositivo 1:**
 ```
-app/
-├── src/main/
-│   ├── java/com/vivacomigo/app/
-│   │   ├── data/
-│   │   │   ├── model/          # Modelos de dados (User, Photo)
-│   │   │   └── repository/     # Repositórios Firebase
-│   │   ├── ui/
-│   │   │   ├── screen/         # Telas Compose
-│   │   │   ├── theme/          # Tema do app
-│   │   │   └── viewmodel/      # ViewModels
-│   │   ├── widget/             # Widget e sincronização
-│   │   ├── MainActivity.kt
-│   │   └── VivaApp.kt
-│   ├── res/                    # Recursos (layouts, strings, etc)
-│   └── AndroidManifest.xml
-└── build.gradle.kts
+Abrir app → Ver código ABC123
 ```
 
-## 🛡️ Segurança
+**No dispositivo 2:**
+```
+Abrir app → Inserir código ABC123 → Parear
+```
 
-- Todas as imagens são armazenadas de forma segura no Firebase Storage
-- Regras do Firestore garantem que apenas usuários autenticados possam acessar seus dados
-- Cada usuário só pode ver fotos enviadas para ele ou por ele
-- Senhas são gerenciadas pelo Firebase Authentication
+Ambos ficam conectados instantaneamente! ❤️
+
+### 2. Enviar Foto
+
+```
+Tela principal → Botão "+" → Selecionar foto → Enviar
+```
+
+A foto aparece automaticamente no widget do parceiro!
+
+### 3. Adicionar Widget
+
+```
+Pressionar e segurar tela inicial → Widgets → "Viva Comigo" → Arrastar
+```
+
+O widget mostrará a última foto recebida ou um ❤️ emoji se não houver foto.
+
+## 🔧 Arquitetura
+
+```
+┌─────────────────────────────────────────┐
+│           UI Layer (Compose)            │
+│  MainActivity, HomeScreen, PairingScreen│
+└──────────────┬──────────────────────────┘
+               │ observa StateFlow
+               ↓
+┌─────────────────────────────────────────┐
+│      ViewModel Layer (State Mgmt)       │
+│          MainViewModel                  │
+└──────────────┬──────────────────────────┘
+               │ chama repositories
+               ↓
+┌─────────────────────────────────────────┐
+│      Repository Layer (Data Access)     │
+│  AuthRepo, UserRepo, PhotoRepo          │
+└──────────────┬──────────────────────────┘
+               │ executa queries
+               ↓
+┌─────────────────────────────────────────┐
+│       Data Layer (JDBC Pool)            │
+│       DatabaseHelper                    │
+└──────────────┬──────────────────────────┘
+               │ JDBC
+               ↓
+┌─────────────────────────────────────────┐
+│        MySQL Database (Remoto)          │
+│    Tables: users, photos                │
+└─────────────────────────────────────────┘
+```
+
+Para detalhes completos, veja [.claude/ARCHITECTURE.md](.claude/ARCHITECTURE.md).
+
+## 🗂️ Estrutura do Projeto
+
+```
+Widget-para-compartilhar-fotos/
+├── .claude/                     # 📚 Documentação para IA
+│   ├── ARCHITECTURE.md          # Arquitetura detalhada
+│   ├── CODE_GUIDE.md            # Guia de código
+│   ├── COMPONENTS.md            # Docs de componentes
+│   └── DATABASE.md              # Schema e queries
+│
+├── app/                         # 📱 Aplicativo Android
+│   └── src/main/
+│       ├── java/com/vivacomigo/app/
+│       │   ├── data/
+│       │   │   ├── database/    # DatabaseHelper, Config
+│       │   │   ├── model/       # User, Photo
+│       │   │   └── repository/  # Auth, User, Photo repos
+│       │   ├── ui/
+│       │   │   ├── screen/      # HomeScreen, PairingScreen
+│       │   │   ├── theme/       # Tema Material 3
+│       │   │   └── viewmodel/   # MainViewModel
+│       │   ├── widget/          # PhotoWidget, Worker
+│       │   ├── MainActivity.kt
+│       │   └── VivaApp.kt
+│       └── res/                 # Recursos (strings, cores, etc)
+│
+├── backend/                     # 🖥️ Backend Node.js (opcional)
+│   ├── src/
+│   │   ├── controllers/         # Lógica de negócio
+│   │   ├── routes/              # Rotas HTTP
+│   │   ├── middleware/          # AuthMiddleware
+│   │   └── server.js            # Express app
+│   └── database/
+│       └── schema.sql           # Schema MySQL
+│
+├── AI_CONTEXT.md                # 🤖 Contexto rápido para IA
+├── README.md                    # Este arquivo
+├── SETUP.md                     # Guia de setup detalhado
+└── build.gradle.kts             # Config Gradle
+```
+
+## 🔐 Segurança
+
+### ⚠️ Avisos Importantes
+
+1. **Credenciais hardcoded**: O arquivo `DatabaseConfig.kt` contém credenciais em texto claro. **Não compartilhe o APK publicamente!**
+
+2. **Conexão sem SSL**: Atualmente `USE_SSL = false`. Em produção, habilite SSL/TLS.
+
+3. **BLOB não criptografado**: Fotos são armazenadas sem criptografia. Considere AES-256 para produção.
+
+### Melhorias Recomendadas para Produção
+
+- [ ] Migrar credenciais para BuildConfig ou NDK
+- [ ] Usar API REST ao invés de JDBC direto
+- [ ] Habilitar SSL para conexões MySQL
+- [ ] Implementar criptografia de BLOB
+- [ ] Adicionar autenticação biométrica
+- [ ] Implementar Firebase Cloud Messaging (substituir polling)
+
+Veja mais em [.claude/ARCHITECTURE.md → Segurança](.claude/ARCHITECTURE.md#segurança).
+
+## 🛠️ Comandos Úteis
+
+```bash
+# Build e instalar debug
+./gradlew installDebug
+
+# Ver logs do app
+adb logcat | grep "PhotoRepository"
+
+# Executar backend (opcional)
+cd backend && npm start
+
+# Conectar ao MySQL
+mysql -h srv1965.hstgr.io -u usuario -p
+
+# Backup do banco
+mysqldump -h host -u user -p database > backup.sql
+```
+
+## 🧪 Desenvolvimento
+
+### Adicionar Nova Funcionalidade
+
+1. **Leia a documentação relevante:**
+   - [AI_CONTEXT.md](AI_CONTEXT.md) - Contexto geral
+   - [.claude/CODE_GUIDE.md](.claude/CODE_GUIDE.md) - Como fazer mudanças
+
+2. **Identifique os componentes a modificar:**
+   - Consulte [.claude/COMPONENTS.md](.claude/COMPONENTS.md)
+
+3. **Siga os padrões de código:**
+   - Use `suspend fun` para operações assíncronas
+   - Retorne `Result<T>` dos repositories
+   - Atualize `StateFlow` no ViewModel
+   - Componha UI com Composables puros
+
+4. **Teste e faça commit:**
+   ```bash
+   ./gradlew assembleDebug
+   git add .
+   git commit -m "feat: descrição da mudança"
+   ```
+
+### Exemplos de Mudanças Comuns
+
+- **Adicionar campo ao User**: Ver [CODE_GUIDE.md → Mudanças Comuns #1](.claude/CODE_GUIDE.md#1-adicionar-um-novo-campo-ao-user)
+- **Criar nova tela**: Ver [CODE_GUIDE.md → Mudanças Comuns #2](.claude/CODE_GUIDE.md#2-adicionar-uma-nova-tela)
+- **Modificar widget**: Ver [CODE_GUIDE.md → Mudanças Comuns #4](.claude/CODE_GUIDE.md#4-modificar-o-widget)
+
+## 📊 Banco de Dados
+
+### Schema Simplificado
+
+**users**
+```sql
+CREATE TABLE users (
+    id VARCHAR(36) PRIMARY KEY,        -- UUID
+    pairing_code VARCHAR(6) UNIQUE,    -- Código de pareamento
+    partner_id VARCHAR(36),            -- ID do parceiro
+    display_name VARCHAR(255)
+);
+```
+
+**photos**
+```sql
+CREATE TABLE photos (
+    id VARCHAR(36) PRIMARY KEY,        -- UUID
+    sender_id VARCHAR(36),             -- Quem enviou
+    receiver_id VARCHAR(36),           -- Quem recebe
+    image_data LONGBLOB,               -- Foto (BLOB até 10MB)
+    timestamp BIGINT                   -- Quando foi enviada
+);
+```
+
+Para schema completo e queries, veja [.claude/DATABASE.md](.claude/DATABASE.md).
+
+## 🐛 Troubleshooting
+
+### App não conecta ao MySQL
+- Verifique credenciais em `DatabaseConfig.kt`
+- Teste conexão: `mysql -h host -u user -p`
+- Veja [DATABASE.md → Troubleshooting](.claude/DATABASE.md#troubleshooting)
+
+### Widget não atualiza
+- Verifique se WorkManager está agendado
+- Force atualização: `viewModel.updateWidget()`
+- Veja [CODE_GUIDE.md → Debugging](.claude/CODE_GUIDE.md#2-widget-não-atualiza)
+
+### Foto não aparece após envio
+- Verifique tamanho (máx 10MB)
+- Verifique permissões de leitura
+- Veja logs: `adb logcat | grep PhotoRepository`
+
+## 🤝 Contribuindo
+
+Contribuições são bem-vindas! Para contribuir:
+
+1. Fork o projeto
+2. Crie uma branch: `git checkout -b feature/nova-feature`
+3. Commit: `git commit -m 'feat: adiciona nova feature'`
+4. Push: `git push origin feature/nova-feature`
+5. Abra um Pull Request
+
+### Diretrizes
+- Siga os padrões de código em [CODE_GUIDE.md](.claude/CODE_GUIDE.md)
+- Adicione testes (quando disponível)
+- Atualize documentação se necessário
+- Use commits semânticos (feat, fix, docs, refactor, etc)
 
 ## 📝 Licença
 
 Este projeto é de código aberto e está disponível para uso educacional.
 
-## 🤝 Contribuições
+## 👨‍💻 Autor
 
-Contribuições são bem-vindas! Sinta-se à vontade para:
-- Reportar bugs
-- Sugerir novas funcionalidades
-- Enviar pull requests
+Desenvolvido com ❤️ por [Gabriel Klein](https://github.com/Gabriel-KleinL)
 
-## 👨‍💻 Desenvolvimento
+## 🙏 Agradecimentos
 
-Desenvolvido com ❤️ usando as melhores práticas do Android moderno.
+- **Jetpack Compose** pela UI moderna
+- **Glance** pelo framework de widgets
+- **Comunidade Android** pelas melhores práticas
 
 ---
 
-**Nota:** Este aplicativo requer o arquivo `google-services.json` do Firebase para funcionar. Siga as instruções de configuração acima para obter este arquivo.
+## 📖 Índice de Documentação
+
+| Documento | Público-Alvo | Quando Ler |
+|-----------|--------------|------------|
+| [README.md](README.md) | Todos | Visão geral do projeto |
+| [SETUP.md](SETUP.md) | Desenvolvedores | Ao configurar ambiente |
+| [AI_CONTEXT.md](AI_CONTEXT.md) | IA/Agentes | **Antes de qualquer mudança** |
+| [.claude/ARCHITECTURE.md](.claude/ARCHITECTURE.md) | IA/Dev | Entender arquitetura |
+| [.claude/CODE_GUIDE.md](.claude/CODE_GUIDE.md) | IA/Dev | Ao fazer mudanças |
+| [.claude/COMPONENTS.md](.claude/COMPONENTS.md) | IA/Dev | Ao modificar componentes |
+| [.claude/DATABASE.md](.claude/DATABASE.md) | IA/Dev | Ao trabalhar com banco |
+
+---
+
+**Nota**: Este projeto usa MySQL JDBC direto do Android. Para produção, considere migrar para API REST. Veja [ARCHITECTURE.md → Limitações](.claude/ARCHITECTURE.md#limitações-conhecidas).
