@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<network-security-config>
+    <!-- Configuração para produção - permite HTTP e HTTPS -->
+    <!-- Permite comunicação com servidor remoto sem restrições -->
+    <base-config cleartextTrafficPermitted="true">
+        <trust-anchors>
+            <certificates src="system" />
+            <certificates src="user" />
+        </trust-anchors>
+    </base-config>
+    
+    <!-- Se quiser forçar HTTPS apenas em produção, descomente abaixo e comente o base-config acima -->
+    <!--
+    <base-config cleartextTrafficPermitted="false">
+        <trust-anchors>
+            <certificates src="system" />
+            <certificates src="user" />
+        </trust-anchors>
+    </base-config>
+    <domain-config cleartextTrafficPermitted="true">
+        <domain includeSubdomains="true">srv1965.hstgr.io</domain>
+    </domain-config>
+    -->
+</network-security-config>
+

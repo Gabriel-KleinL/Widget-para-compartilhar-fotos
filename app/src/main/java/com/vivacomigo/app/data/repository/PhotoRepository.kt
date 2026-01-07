@@ -1,96 +1,136 @@
 package com.vivacomigo.app.data.repository
 
+import android.content.Context
 import android.net.Uri
-import com.google.firebase.firestore.FirebaseFirestore
-import com.google.firebase.firestore.Query
-import com.google.firebase.storage.FirebaseStorage
+import com.vivacomigo.app.data.database.DatabaseHelper
 import com.vivacomigo.app.data.model.Photo
-import kotlinx.coroutines.channels.awaitClose
-import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.callbackFlow
-import kotlinx.coroutines.tasks.await
-import java.util.UUID
+import java.io.InputStream
+import java.sql.ResultSet
 
-class PhotoRepository {
-    private val firestore = FirebaseFirestore.getInstance()
-    private val storage = FirebaseStorage.getInstance()
-    private val photosCollection = firestore.collection("photos")
-
+class PhotoRepository(private val context: Context) {
+    
+    private fun mapPhotoFromResultSet(rs: ResultSet): Photo {
+        return Photo(
+            id = rs.getString("id") ?: "",
+            sender_id = rs.getString("sender_id") ?: "",
+            receiver_id = rs.getString("receiver_id") ?: "",
+            timestamp = rs.getLong("timestamp"),
+            seen = rs.getBoolean("seen")
+        )
+    }
+    
     suspend fun uploadPhoto(
         imageUri: Uri,
         senderId: String,
         receiverId: String
     ): Result<Photo> {
         return try {
-            // Upload image to Firebase Storage
-            val filename = "${UUID.randomUUID()}.jpg"
-            val storageRef = storage.reference.child("photos/$filename")
-            storageRef.putFile(imageUri).await()
-            val downloadUrl = storageRef.downloadUrl.await().toString()
-
-            // Create photo document
-            val photoId = photosCollection.document().id
-            val photo = Photo(
-                id = photoId,
-                senderId = senderId,
-                receiverId = receiverId,
-                imageUrl = downloadUrl,
-                timestamp = System.currentTimeMillis()
+            val contentResolver = context.contentResolver
+            val inputStream: InputStream? = contentResolver.openInputStream(imageUri)
+            
+            if (inputStream == null) {
+                return Result.failure(Exception("Não foi possível abrir a imagem"))
+            }
+            
+            val imageBytes = inputStream.readBytes()
+            inputStream.close()
+            
+            // Verificar se o destinatário é o parceiro
+            val userRepo = UserRepository(context)
+            val currentUserResult = userRepo.getUser(senderId)
+            
+            return currentUserResult.fold(
+                onSuccess = { user ->
+                    if (user.partnerId != receiverId) {
+                        return@fold Result.failure(Exception("Você só pode enviar fotos para seu parceiro"))
+                    }
+                    
+                    // Criar foto
+                    val photoId = DatabaseHelper.generateUUID()
+                    val timestamp = System.currentTimeMillis()
+                    
+                    val insertResult = DatabaseHelper.executeUpdate(
+                        "INSERT INTO photos (id, sender_id, receiver_id, image_data, timestamp, seen) VALUES (?, ?, ?, ?, ?, ?)",
+                        listOf(photoId, senderId, receiverId, imageBytes, timestamp, false)
+                    )
+                    
+                    insertResult.fold(
+                        onSuccess = {
+                            val photo = Photo(
+                                id = photoId,
+                                sender_id = senderId,
+                                receiver_id = receiverId,
+                                timestamp = timestamp,
+                                seen = false
+                            )
+                            Result.success(photo)
+                        },
+                        onFailure = { error ->
+                            Result.failure(error)
+                        }
+                    )
+                },
+                onFailure = { error ->
+                    Result.failure(error)
+                }
             )
-
-            photosCollection.document(photoId).set(photo.toMap()).await()
-            Result.success(photo)
         } catch (e: Exception) {
             Result.failure(e)
         }
     }
-
-    fun getLatestPhotoForUser(userId: String): Flow<Photo?> = callbackFlow {
-        val listener = photosCollection
-            .whereEqualTo("receiverId", userId)
-            .orderBy("timestamp", Query.Direction.DESCENDING)
-            .limit(1)
-            .addSnapshotListener { snapshot, error ->
-                if (error != null) {
-                    close(error)
-                    return@addSnapshotListener
-                }
-
-                val photo = snapshot?.documents?.firstOrNull()?.data?.let {
-                    Photo.fromMap(it)
-                }
-                trySend(photo)
-            }
-
-        awaitClose { listener.remove() }
+    
+    suspend fun getLatestPhotoForUser(userId: String): Photo? {
+        return DatabaseHelper.executeQuery(
+            "SELECT id, sender_id, receiver_id, timestamp, seen FROM photos WHERE receiver_id = ? ORDER BY timestamp DESC LIMIT 1",
+            listOf(userId),
+            ::mapPhotoFromResultSet
+        ).getOrNull()
     }
-
-    fun getPhotosForUser(userId: String): Flow<List<Photo>> = callbackFlow {
-        val listener = photosCollection
-            .whereEqualTo("receiverId", userId)
-            .orderBy("timestamp", Query.Direction.DESCENDING)
-            .addSnapshotListener { snapshot, error ->
-                if (error != null) {
-                    close(error)
-                    return@addSnapshotListener
-                }
-
-                val photos = snapshot?.documents?.mapNotNull { doc ->
-                    doc.data?.let { Photo.fromMap(it) }
-                } ?: emptyList()
-
-                trySend(photos)
-            }
-
-        awaitClose { listener.remove() }
+    
+    suspend fun getPhotosForUser(userId: String): List<Photo> {
+        return DatabaseHelper.executeQueryList(
+            "SELECT id, sender_id, receiver_id, timestamp, seen FROM photos WHERE receiver_id = ? ORDER BY timestamp DESC",
+            listOf(userId),
+            ::mapPhotoFromResultSet
+        ).getOrElse { emptyList() }
     }
-
-    suspend fun markPhotoAsSeen(photoId: String): Result<Unit> {
+    
+    suspend fun getPhotoImage(photoId: String, userId: String): ByteArray? {
         return try {
-            photosCollection.document(photoId).update("seen", true).await()
-            Result.success(Unit)
+            // Verificar se o usuário tem permissão (é o remetente ou destinatário)
+            val photoResult = DatabaseHelper.executeQuery(
+                "SELECT sender_id, receiver_id, image_data FROM photos WHERE id = ?",
+                listOf(photoId)
+            ) { rs ->
+                Triple(
+                    rs.getString("sender_id") ?: "",
+                    rs.getString("receiver_id") ?: "",
+                    rs.getBytes("image_data") ?: ByteArray(0)
+                )
+            }
+            
+            photoResult.fold(
+                onSuccess = { (senderId, receiverId, imageData) ->
+                    if (senderId == userId || receiverId == userId) {
+                        imageData
+                    } else {
+                        null
+                    }
+                },
+                onFailure = { null }
+            )
         } catch (e: Exception) {
-            Result.failure(e)
+            null
         }
+    }
+    
+    suspend fun markPhotoAsSeen(photoId: String): Result<Unit> {
+        return DatabaseHelper.executeUpdate(
+            "UPDATE photos SET seen = TRUE WHERE id = ?",
+            listOf(photoId)
+        ).fold(
+            onSuccess = { Result.success(Unit) },
+            onFailure = { error -> Result.failure(error) }
+        )
     }
 }

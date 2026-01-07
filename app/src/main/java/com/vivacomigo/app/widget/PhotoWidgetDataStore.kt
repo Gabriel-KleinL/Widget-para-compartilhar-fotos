@@ -12,21 +12,19 @@ import kotlinx.coroutines.flow.map
 private val Context.widgetDataStore: DataStore<Preferences> by preferencesDataStore(name = "widget_prefs")
 
 object PhotoWidgetDataStore {
-    private val PHOTO_URL_KEY = stringPreferencesKey("photo_url")
+    private val PHOTO_ID_KEY = stringPreferencesKey("photo_id")
 
-    suspend fun savePhotoUrl(context: Context, url: String) {
+    suspend fun savePhotoId(context: Context, photoId: String) {
         context.widgetDataStore.edit { preferences ->
-            preferences[PHOTO_URL_KEY] = url
+            preferences[PHOTO_ID_KEY] = photoId
         }
     }
 
-    fun getPhotoUrl(context: Context): String? {
+    suspend fun getPhotoId(context: Context): String? {
         return try {
-            kotlinx.coroutines.runBlocking {
-                context.widgetDataStore.data
-                    .map { preferences -> preferences[PHOTO_URL_KEY] }
-                    .first()
-            }
+            context.widgetDataStore.data
+                .map { preferences -> preferences[PHOTO_ID_KEY] }
+                .first()
         } catch (e: Exception) {
             null
         }

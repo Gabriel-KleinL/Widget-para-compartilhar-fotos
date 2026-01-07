@@ -1,0 +1,476 @@
+1<?xml version="1.0" encoding="utf-8"?>
+2<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+3    package="com.vivacomigo.app"
+4    android:versionCode="1"
+5    android:versionName="1.0" >
+6
+7    <uses-sdk
+8        android:minSdkVersion="26"
+9        android:targetSdkVersion="34" />
+10
+11    <uses-permission android:name="android.permission.INTERNET" />
+11-->/home/gabriel/Documentos/Pessoal/Widget-para-compartilhar-fotos/app/src/main/AndroidManifest.xml:5:5-67
+11-->/home/gabriel/Documentos/Pessoal/Widget-para-compartilhar-fotos/app/src/main/AndroidManifest.xml:5:22-64
+12    <uses-permission android:name="android.permission.READ_MEDIA_IMAGES" />
+12-->/home/gabriel/Documentos/Pessoal/Widget-para-compartilhar-fotos/app/src/main/AndroidManifest.xml:6:5-76
+12-->/home/gabriel/Documentos/Pessoal/Widget-para-compartilhar-fotos/app/src/main/AndroidManifest.xml:6:22-73
+13    <uses-permission
+13-->/home/gabriel/Documentos/Pessoal/Widget-para-compartilhar-fotos/app/src/main/AndroidManifest.xml:7:5-8:38
+14        android:name="android.permission.READ_EXTERNAL_STORAGE"
+14-->/home/gabriel/Documentos/Pessoal/Widget-para-compartilhar-fotos/app/src/main/AndroidManifest.xml:7:22-77
+15        android:maxSdkVersion="32" />
+15-->/home/gabriel/Documentos/Pessoal/Widget-para-compartilhar-fotos/app/src/main/AndroidManifest.xml:8:9-35
+16    <uses-permission android:name="android.permission.CAMERA" />
+16-->/home/gabriel/Documentos/Pessoal/Widget-para-compartilhar-fotos/app/src/main/AndroidManifest.xml:9:5-65
+16-->/home/gabriel/Documentos/Pessoal/Widget-para-compartilhar-fotos/app/src/main/AndroidManifest.xml:9:22-62
+17    <uses-permission android:name="android.permission.WAKE_LOCK" />
+17-->[androidx.work:work-runtime:2.9.0] /home/gabriel/.gradle/caches/transforms-3/795cfc56b0370abf8ccaac2477cf15fd/transformed/work-runtime-2.9.0/AndroidManifest.xml:23:5-68
+17-->[androidx.work:work-runtime:2.9.0] /home/gabriel/.gradle/caches/transforms-3/795cfc56b0370abf8ccaac2477cf15fd/transformed/work-runtime-2.9.0/AndroidManifest.xml:23:22-65
+18    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+18-->[androidx.work:work-runtime:2.9.0] /home/gabriel/.gradle/caches/transforms-3/795cfc56b0370abf8ccaac2477cf15fd/transformed/work-runtime-2.9.0/AndroidManifest.xml:24:5-79
+18-->[androidx.work:work-runtime:2.9.0] /home/gabriel/.gradle/caches/transforms-3/795cfc56b0370abf8ccaac2477cf15fd/transformed/work-runtime-2.9.0/AndroidManifest.xml:24:22-76
+19    <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
+19-->[androidx.work:work-runtime:2.9.0] /home/gabriel/.gradle/caches/transforms-3/795cfc56b0370abf8ccaac2477cf15fd/transformed/work-runtime-2.9.0/AndroidManifest.xml:25:5-81
+19-->[androidx.work:work-runtime:2.9.0] /home/gabriel/.gradle/caches/transforms-3/795cfc56b0370abf8ccaac2477cf15fd/transformed/work-runtime-2.9.0/AndroidManifest.xml:25:22-78
+20    <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
+20-->[androidx.work:work-runtime:2.9.0] /home/gabriel/.gradle/caches/transforms-3/795cfc56b0370abf8ccaac2477cf15fd/transformed/work-runtime-2.9.0/AndroidManifest.xml:26:5-77
+20-->[androidx.work:work-runtime:2.9.0] /home/gabriel/.gradle/caches/transforms-3/795cfc56b0370abf8ccaac2477cf15fd/transformed/work-runtime-2.9.0/AndroidManifest.xml:26:22-74
+21
+22    <permission
+22-->[androidx.core:core:1.12.0] /home/gabriel/.gradle/caches/transforms-3/2ccd268e0ca2e1cd10ec650ac8067a3e/transformed/core-1.12.0/AndroidManifest.xml:22:5-24:47
+23        android:name="com.vivacomigo.app.DYNAMIC_RECEIVER_NOT_EXPORTED_PERMISSION"
+23-->[androidx.core:core:1.12.0] /home/gabriel/.gradle/caches/transforms-3/2ccd268e0ca2e1cd10ec650ac8067a3e/transformed/core-1.12.0/AndroidManifest.xml:23:9-81
+24        android:protectionLevel="signature" />
+24-->[androidx.core:core:1.12.0] /home/gabriel/.gradle/caches/transforms-3/2ccd268e0ca2e1cd10ec650ac8067a3e/transformed/core-1.12.0/AndroidManifest.xml:24:9-44
+25
+26    <uses-permission android:name="com.vivacomigo.app.DYNAMIC_RECEIVER_NOT_EXPORTED_PERMISSION" />
+26-->[androidx.core:core:1.12.0] /home/gabriel/.gradle/caches/transforms-3/2ccd268e0ca2e1cd10ec650ac8067a3e/transformed/core-1.12.0/AndroidManifest.xml:26:5-97
+26-->[androidx.core:core:1.12.0] /home/gabriel/.gradle/caches/transforms-3/2ccd268e0ca2e1cd10ec650ac8067a3e/transformed/core-1.12.0/AndroidManifest.xml:26:22-94
+27
+28    <application
+28-->/home/gabriel/Documentos/Pessoal/Widget-para-compartilhar-fotos/app/src/main/AndroidManifest.xml:11:5-68:19
+29        android:name="com.vivacomigo.app.VivaApp"
+29-->/home/gabriel/Documentos/Pessoal/Widget-para-compartilhar-fotos/app/src/main/AndroidManifest.xml:12:9-32
+30        android:allowBackup="true"
+30-->/home/gabriel/Documentos/Pessoal/Widget-para-compartilhar-fotos/app/src/main/AndroidManifest.xml:13:9-35
+31        android:appComponentFactory="androidx.core.app.CoreComponentFactory"
+31-->[androidx.core:core:1.12.0] /home/gabriel/.gradle/caches/transforms-3/2ccd268e0ca2e1cd10ec650ac8067a3e/transformed/core-1.12.0/AndroidManifest.xml:28:18-86
+32        android:dataExtractionRules="@xml/data_extraction_rules"
+32-->/home/gabriel/Documentos/Pessoal/Widget-para-compartilhar-fotos/app/src/main/AndroidManifest.xml:14:9-65
+33        android:debuggable="true"
+34        android:extractNativeLibs="false"
+35        android:fullBackupContent="@xml/backup_rules"
+35-->/home/gabriel/Documentos/Pessoal/Widget-para-compartilhar-fotos/app/src/main/AndroidManifest.xml:15:9-54
+36        android:icon="@mipmap/ic_launcher"
+36-->/home/gabriel/Documentos/Pessoal/Widget-para-compartilhar-fotos/app/src/main/AndroidManifest.xml:16:9-43
+37        android:label="@string/app_name"
+37-->/home/gabriel/Documentos/Pessoal/Widget-para-compartilhar-fotos/app/src/main/AndroidManifest.xml:17:9-41
+38        android:networkSecurityConfig="@xml/network_security_config"
+38-->/home/gabriel/Documentos/Pessoal/Widget-para-compartilhar-fotos/app/src/main/AndroidManifest.xml:19:9-69
+39        android:roundIcon="@mipmap/ic_launcher_round"
+39-->/home/gabriel/Documentos/Pessoal/Widget-para-compartilhar-fotos/app/src/main/AndroidManifest.xml:18:9-54
+40        android:supportsRtl="true"
+40-->/home/gabriel/Documentos/Pessoal/Widget-para-compartilhar-fotos/app/src/main/AndroidManifest.xml:20:9-35
+41        android:theme="@style/Theme.VivaComigo" >
+41-->/home/gabriel/Documentos/Pessoal/Widget-para-compartilhar-fotos/app/src/main/AndroidManifest.xml:21:9-48
+42        <activity
+42-->/home/gabriel/Documentos/Pessoal/Widget-para-compartilhar-fotos/app/src/main/AndroidManifest.xml:24:9-32:20
+43            android:name="com.vivacomigo.app.MainActivity"
+43-->/home/gabriel/Documentos/Pessoal/Widget-para-compartilhar-fotos/app/src/main/AndroidManifest.xml:25:13-41
+44            android:exported="true"
+44-->/home/gabriel/Documentos/Pessoal/Widget-para-compartilhar-fotos/app/src/main/AndroidManifest.xml:26:13-36
+45            android:theme="@style/Theme.VivaComigo" >
+45-->/home/gabriel/Documentos/Pessoal/Widget-para-compartilhar-fotos/app/src/main/AndroidManifest.xml:27:13-52
+46            <intent-filter>
+46-->/home/gabriel/Documentos/Pessoal/Widget-para-compartilhar-fotos/app/src/main/AndroidManifest.xml:28:13-31:29
+47                <action android:name="android.intent.action.MAIN" />
+47-->/home/gabriel/Documentos/Pessoal/Widget-para-compartilhar-fotos/app/src/main/AndroidManifest.xml:29:17-69
+47-->/home/gabriel/Documentos/Pessoal/Widget-para-compartilhar-fotos/app/src/main/AndroidManifest.xml:29:25-66
+48
+49                <category android:name="android.intent.category.LAUNCHER" />
+49-->/home/gabriel/Documentos/Pessoal/Widget-para-compartilhar-fotos/app/src/main/AndroidManifest.xml:30:17-77
+49-->/home/gabriel/Documentos/Pessoal/Widget-para-compartilhar-fotos/app/src/main/AndroidManifest.xml:30:27-74
+50            </intent-filter>
+51        </activity>
+52
+53        <!-- Widget Provider -->
+54        <receiver
+54-->/home/gabriel/Documentos/Pessoal/Widget-para-compartilhar-fotos/app/src/main/AndroidManifest.xml:35:9-44:20
+55            android:name="com.vivacomigo.app.widget.PhotoWidgetReceiver"
+55-->/home/gabriel/Documentos/Pessoal/Widget-para-compartilhar-fotos/app/src/main/AndroidManifest.xml:36:13-55
+56            android:exported="true" >
+56-->/home/gabriel/Documentos/Pessoal/Widget-para-compartilhar-fotos/app/src/main/AndroidManifest.xml:37:13-36
+57            <intent-filter>
+57-->/home/gabriel/Documentos/Pessoal/Widget-para-compartilhar-fotos/app/src/main/AndroidManifest.xml:38:13-40:29
+58                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+58-->/home/gabriel/Documentos/Pessoal/Widget-para-compartilhar-fotos/app/src/main/AndroidManifest.xml:39:17-84
+58-->/home/gabriel/Documentos/Pessoal/Widget-para-compartilhar-fotos/app/src/main/AndroidManifest.xml:39:25-81
+59            </intent-filter>
+60
+61            <meta-data
+61-->/home/gabriel/Documentos/Pessoal/Widget-para-compartilhar-fotos/app/src/main/AndroidManifest.xml:41:13-43:61
+62                android:name="android.appwidget.provider"
+62-->/home/gabriel/Documentos/Pessoal/Widget-para-compartilhar-fotos/app/src/main/AndroidManifest.xml:42:17-58
+63                android:resource="@xml/photo_widget_info" />
+63-->/home/gabriel/Documentos/Pessoal/Widget-para-compartilhar-fotos/app/src/main/AndroidManifest.xml:43:17-58
+64        </receiver>
+65
+66        <!-- FileProvider for sharing files -->
+67        <provider
+68            android:name="androidx.core.content.FileProvider"
+68-->/home/gabriel/Documentos/Pessoal/Widget-para-compartilhar-fotos/app/src/main/AndroidManifest.xml:48:13-62
+69            android:authorities="com.vivacomigo.app.fileprovider"
+69-->/home/gabriel/Documentos/Pessoal/Widget-para-compartilhar-fotos/app/src/main/AndroidManifest.xml:49:13-64
+70            android:exported="false"
+70-->/home/gabriel/Documentos/Pessoal/Widget-para-compartilhar-fotos/app/src/main/AndroidManifest.xml:50:13-37
+71            android:grantUriPermissions="true" >
+71-->/home/gabriel/Documentos/Pessoal/Widget-para-compartilhar-fotos/app/src/main/AndroidManifest.xml:51:13-47
+72            <meta-data
+72-->/home/gabriel/Documentos/Pessoal/Widget-para-compartilhar-fotos/app/src/main/AndroidManifest.xml:52:13-54:54
+73                android:name="android.support.FILE_PROVIDER_PATHS"
+73-->/home/gabriel/Documentos/Pessoal/Widget-para-compartilhar-fotos/app/src/main/AndroidManifest.xml:53:17-67
+74                android:resource="@xml/file_paths" />
+74-->/home/gabriel/Documentos/Pessoal/Widget-para-compartilhar-fotos/app/src/main/AndroidManifest.xml:54:17-51
+75        </provider>
+76
+77        <!-- WorkManager for background sync -->
+78        <provider
+79            android:name="androidx.startup.InitializationProvider"
+79-->/home/gabriel/Documentos/Pessoal/Widget-para-compartilhar-fotos/app/src/main/AndroidManifest.xml:59:13-67
+80            android:authorities="com.vivacomigo.app.androidx-startup"
+80-->/home/gabriel/Documentos/Pessoal/Widget-para-compartilhar-fotos/app/src/main/AndroidManifest.xml:60:13-68
+81            android:exported="false" >
+81-->/home/gabriel/Documentos/Pessoal/Widget-para-compartilhar-fotos/app/src/main/AndroidManifest.xml:61:13-37
+82            <meta-data
+82-->/home/gabriel/Documentos/Pessoal/Widget-para-compartilhar-fotos/app/src/main/AndroidManifest.xml:63:13-65:52
+83                android:name="androidx.work.WorkManagerInitializer"
+83-->/home/gabriel/Documentos/Pessoal/Widget-para-compartilhar-fotos/app/src/main/AndroidManifest.xml:64:17-68
+84                android:value="androidx.startup" />
+84-->/home/gabriel/Documentos/Pessoal/Widget-para-compartilhar-fotos/app/src/main/AndroidManifest.xml:65:17-49
+85            <meta-data
+85-->[androidx.emoji2:emoji2:1.4.0] /home/gabriel/.gradle/caches/transforms-3/8a116d6c90f90674631436edc1f6e8c1/transformed/jetified-emoji2-1.4.0/AndroidManifest.xml:29:13-31:52
+86                android:name="androidx.emoji2.text.EmojiCompatInitializer"
+86-->[androidx.emoji2:emoji2:1.4.0] /home/gabriel/.gradle/caches/transforms-3/8a116d6c90f90674631436edc1f6e8c1/transformed/jetified-emoji2-1.4.0/AndroidManifest.xml:30:17-75
+87                android:value="androidx.startup" />
+87-->[androidx.emoji2:emoji2:1.4.0] /home/gabriel/.gradle/caches/transforms-3/8a116d6c90f90674631436edc1f6e8c1/transformed/jetified-emoji2-1.4.0/AndroidManifest.xml:31:17-49
+88            <meta-data
+88-->[androidx.lifecycle:lifecycle-process:2.6.2] /home/gabriel/.gradle/caches/transforms-3/a87653f823cc6292df5b23ce4123ef1b/transformed/jetified-lifecycle-process-2.6.2/AndroidManifest.xml:29:13-31:52
+89                android:name="androidx.lifecycle.ProcessLifecycleInitializer"
+89-->[androidx.lifecycle:lifecycle-process:2.6.2] /home/gabriel/.gradle/caches/transforms-3/a87653f823cc6292df5b23ce4123ef1b/transformed/jetified-lifecycle-process-2.6.2/AndroidManifest.xml:30:17-78
+90                android:value="androidx.startup" />
+90-->[androidx.lifecycle:lifecycle-process:2.6.2] /home/gabriel/.gradle/caches/transforms-3/a87653f823cc6292df5b23ce4123ef1b/transformed/jetified-lifecycle-process-2.6.2/AndroidManifest.xml:31:17-49
+91            <meta-data
+91-->[androidx.profileinstaller:profileinstaller:1.3.1] /home/gabriel/.gradle/caches/transforms-3/5075e54ed647344dbc01dc103af60b96/transformed/jetified-profileinstaller-1.3.1/AndroidManifest.xml:29:13-31:52
+92                android:name="androidx.profileinstaller.ProfileInstallerInitializer"
+92-->[androidx.profileinstaller:profileinstaller:1.3.1] /home/gabriel/.gradle/caches/transforms-3/5075e54ed647344dbc01dc103af60b96/transformed/jetified-profileinstaller-1.3.1/AndroidManifest.xml:30:17-85
+93                android:value="androidx.startup" />
+93-->[androidx.profileinstaller:profileinstaller:1.3.1] /home/gabriel/.gradle/caches/transforms-3/5075e54ed647344dbc01dc103af60b96/transformed/jetified-profileinstaller-1.3.1/AndroidManifest.xml:31:17-49
+94        </provider>
+95
+96        <activity
+96-->[androidx.glance:glance-appwidget:1.0.0] /home/gabriel/.gradle/caches/transforms-3/ccd5f21dd1cca20e175d7945102f2f01/transformed/jetified-glance-appwidget-1.0.0/AndroidManifest.xml:23:9-27:40
+97            android:name="androidx.glance.appwidget.action.ActionTrampolineActivity"
+97-->[androidx.glance:glance-appwidget:1.0.0] /home/gabriel/.gradle/caches/transforms-3/ccd5f21dd1cca20e175d7945102f2f01/transformed/jetified-glance-appwidget-1.0.0/AndroidManifest.xml:24:13-85
+98            android:enabled="true"
+98-->[androidx.glance:glance-appwidget:1.0.0] /home/gabriel/.gradle/caches/transforms-3/ccd5f21dd1cca20e175d7945102f2f01/transformed/jetified-glance-appwidget-1.0.0/AndroidManifest.xml:25:13-35
+99            android:excludeFromRecents="true"
+99-->[androidx.glance:glance-appwidget:1.0.0] /home/gabriel/.gradle/caches/transforms-3/ccd5f21dd1cca20e175d7945102f2f01/transformed/jetified-glance-appwidget-1.0.0/AndroidManifest.xml:26:13-46
+100            android:exported="false" />
+100-->[androidx.glance:glance-appwidget:1.0.0] /home/gabriel/.gradle/caches/transforms-3/ccd5f21dd1cca20e175d7945102f2f01/transformed/jetified-glance-appwidget-1.0.0/AndroidManifest.xml:27:13-37
+101        <activity
+101-->[androidx.glance:glance-appwidget:1.0.0] /home/gabriel/.gradle/caches/transforms-3/ccd5f21dd1cca20e175d7945102f2f01/transformed/jetified-glance-appwidget-1.0.0/AndroidManifest.xml:28:9-35:81
+102            android:name="androidx.glance.appwidget.action.InvisibleActionTrampolineActivity"
+102-->[androidx.glance:glance-appwidget:1.0.0] /home/gabriel/.gradle/caches/transforms-3/ccd5f21dd1cca20e175d7945102f2f01/transformed/jetified-glance-appwidget-1.0.0/AndroidManifest.xml:29:13-94
+103            android:enabled="true"
+103-->[androidx.glance:glance-appwidget:1.0.0] /home/gabriel/.gradle/caches/transforms-3/ccd5f21dd1cca20e175d7945102f2f01/transformed/jetified-glance-appwidget-1.0.0/AndroidManifest.xml:30:13-35
+104            android:exported="false"
+104-->[androidx.glance:glance-appwidget:1.0.0] /home/gabriel/.gradle/caches/transforms-3/ccd5f21dd1cca20e175d7945102f2f01/transformed/jetified-glance-appwidget-1.0.0/AndroidManifest.xml:31:13-37
+105            android:launchMode="singleInstance"
+105-->[androidx.glance:glance-appwidget:1.0.0] /home/gabriel/.gradle/caches/transforms-3/ccd5f21dd1cca20e175d7945102f2f01/transformed/jetified-glance-appwidget-1.0.0/AndroidManifest.xml:32:13-48
+106            android:noHistory="true"
+106-->[androidx.glance:glance-appwidget:1.0.0] /home/gabriel/.gradle/caches/transforms-3/ccd5f21dd1cca20e175d7945102f2f01/transformed/jetified-glance-appwidget-1.0.0/AndroidManifest.xml:33:13-37
+107            android:taskAffinity="androidx.glance.appwidget.ListAdapterCallbackTrampoline"
+107-->[androidx.glance:glance-appwidget:1.0.0] /home/gabriel/.gradle/caches/transforms-3/ccd5f21dd1cca20e175d7945102f2f01/transformed/jetified-glance-appwidget-1.0.0/AndroidManifest.xml:34:13-91
+108            android:theme="@style/Widget.Glance.AppWidget.CallbackTrampoline" />
+108-->[androidx.glance:glance-appwidget:1.0.0] /home/gabriel/.gradle/caches/transforms-3/ccd5f21dd1cca20e175d7945102f2f01/transformed/jetified-glance-appwidget-1.0.0/AndroidManifest.xml:35:13-78
+109
+110        <receiver
+110-->[androidx.glance:glance-appwidget:1.0.0] /home/gabriel/.gradle/caches/transforms-3/ccd5f21dd1cca20e175d7945102f2f01/transformed/jetified-glance-appwidget-1.0.0/AndroidManifest.xml:37:9-40:40
+111            android:name="androidx.glance.appwidget.action.ActionCallbackBroadcastReceiver"
+111-->[androidx.glance:glance-appwidget:1.0.0] /home/gabriel/.gradle/caches/transforms-3/ccd5f21dd1cca20e175d7945102f2f01/transformed/jetified-glance-appwidget-1.0.0/AndroidManifest.xml:38:13-92
+112            android:enabled="true"
+112-->[androidx.glance:glance-appwidget:1.0.0] /home/gabriel/.gradle/caches/transforms-3/ccd5f21dd1cca20e175d7945102f2f01/transformed/jetified-glance-appwidget-1.0.0/AndroidManifest.xml:39:13-35
+113            android:exported="false" />
+113-->[androidx.glance:glance-appwidget:1.0.0] /home/gabriel/.gradle/caches/transforms-3/ccd5f21dd1cca20e175d7945102f2f01/transformed/jetified-glance-appwidget-1.0.0/AndroidManifest.xml:40:13-37
+114        <receiver
+114-->[androidx.glance:glance-appwidget:1.0.0] /home/gabriel/.gradle/caches/transforms-3/ccd5f21dd1cca20e175d7945102f2f01/transformed/jetified-glance-appwidget-1.0.0/AndroidManifest.xml:41:9-48:20
+115            android:name="androidx.glance.appwidget.MyPackageReplacedReceiver"
+115-->[androidx.glance:glance-appwidget:1.0.0] /home/gabriel/.gradle/caches/transforms-3/ccd5f21dd1cca20e175d7945102f2f01/transformed/jetified-glance-appwidget-1.0.0/AndroidManifest.xml:42:13-79
+116            android:enabled="true"
+116-->[androidx.glance:glance-appwidget:1.0.0] /home/gabriel/.gradle/caches/transforms-3/ccd5f21dd1cca20e175d7945102f2f01/transformed/jetified-glance-appwidget-1.0.0/AndroidManifest.xml:43:13-35
+117            android:exported="false" >
+117-->[androidx.glance:glance-appwidget:1.0.0] /home/gabriel/.gradle/caches/transforms-3/ccd5f21dd1cca20e175d7945102f2f01/transformed/jetified-glance-appwidget-1.0.0/AndroidManifest.xml:44:13-37
+118            <intent-filter>
+118-->[androidx.glance:glance-appwidget:1.0.0] /home/gabriel/.gradle/caches/transforms-3/ccd5f21dd1cca20e175d7945102f2f01/transformed/jetified-glance-appwidget-1.0.0/AndroidManifest.xml:45:13-47:29
+119                <action android:name="android.intent.action.MY_PACKAGE_REPLACED" />
+119-->[androidx.glance:glance-appwidget:1.0.0] /home/gabriel/.gradle/caches/transforms-3/ccd5f21dd1cca20e175d7945102f2f01/transformed/jetified-glance-appwidget-1.0.0/AndroidManifest.xml:46:17-84
+119-->[androidx.glance:glance-appwidget:1.0.0] /home/gabriel/.gradle/caches/transforms-3/ccd5f21dd1cca20e175d7945102f2f01/transformed/jetified-glance-appwidget-1.0.0/AndroidManifest.xml:46:25-81
+120            </intent-filter>
+121        </receiver>
+122
+123        <service
+123-->[androidx.glance:glance-appwidget:1.0.0] /home/gabriel/.gradle/caches/transforms-3/ccd5f21dd1cca20e175d7945102f2f01/transformed/jetified-glance-appwidget-1.0.0/AndroidManifest.xml:50:9-53:72
+124            android:name="androidx.glance.appwidget.GlanceRemoteViewsService"
+124-->[androidx.glance:glance-appwidget:1.0.0] /home/gabriel/.gradle/caches/transforms-3/ccd5f21dd1cca20e175d7945102f2f01/transformed/jetified-glance-appwidget-1.0.0/AndroidManifest.xml:51:13-78
+125            android:exported="true"
+125-->[androidx.glance:glance-appwidget:1.0.0] /home/gabriel/.gradle/caches/transforms-3/ccd5f21dd1cca20e175d7945102f2f01/transformed/jetified-glance-appwidget-1.0.0/AndroidManifest.xml:52:13-36
+126            android:permission="android.permission.BIND_REMOTEVIEWS" />
+126-->[androidx.glance:glance-appwidget:1.0.0] /home/gabriel/.gradle/caches/transforms-3/ccd5f21dd1cca20e175d7945102f2f01/transformed/jetified-glance-appwidget-1.0.0/AndroidManifest.xml:53:13-69
+127        <service
+127-->[androidx.core:core-remoteviews:1.0.0] /home/gabriel/.gradle/caches/transforms-3/b6c1b2f9464c1aaf6e5e2743abd92fec/transformed/jetified-core-remoteviews-1.0.0/AndroidManifest.xml:24:9-27:63
+128            android:name="androidx.core.widget.RemoteViewsCompatService"
+128-->[androidx.core:core-remoteviews:1.0.0] /home/gabriel/.gradle/caches/transforms-3/b6c1b2f9464c1aaf6e5e2743abd92fec/transformed/jetified-core-remoteviews-1.0.0/AndroidManifest.xml:25:13-73
+129            android:permission="android.permission.BIND_REMOTEVIEWS" />
+129-->[androidx.core:core-remoteviews:1.0.0] /home/gabriel/.gradle/caches/transforms-3/b6c1b2f9464c1aaf6e5e2743abd92fec/transformed/jetified-core-remoteviews-1.0.0/AndroidManifest.xml:26:13-69
+130        <service
+130-->[androidx.work:work-runtime:2.9.0] /home/gabriel/.gradle/caches/transforms-3/795cfc56b0370abf8ccaac2477cf15fd/transformed/work-runtime-2.9.0/AndroidManifest.xml:39:9-45:35
+131            android:name="androidx.work.impl.background.systemalarm.SystemAlarmService"
+131-->[androidx.work:work-runtime:2.9.0] /home/gabriel/.gradle/caches/transforms-3/795cfc56b0370abf8ccaac2477cf15fd/transformed/work-runtime-2.9.0/AndroidManifest.xml:40:13-88
+132            android:directBootAware="false"
+132-->[androidx.work:work-runtime:2.9.0] /home/gabriel/.gradle/caches/transforms-3/795cfc56b0370abf8ccaac2477cf15fd/transformed/work-runtime-2.9.0/AndroidManifest.xml:41:13-44
+133            android:enabled="@bool/enable_system_alarm_service_default"
+133-->[androidx.work:work-runtime:2.9.0] /home/gabriel/.gradle/caches/transforms-3/795cfc56b0370abf8ccaac2477cf15fd/transformed/work-runtime-2.9.0/AndroidManifest.xml:42:13-72
+134            android:exported="false" />
+134-->[androidx.work:work-runtime:2.9.0] /home/gabriel/.gradle/caches/transforms-3/795cfc56b0370abf8ccaac2477cf15fd/transformed/work-runtime-2.9.0/AndroidManifest.xml:43:13-37
+135        <service
+135-->[androidx.work:work-runtime:2.9.0] /home/gabriel/.gradle/caches/transforms-3/795cfc56b0370abf8ccaac2477cf15fd/transformed/work-runtime-2.9.0/AndroidManifest.xml:46:9-52:35
+136            android:name="androidx.work.impl.background.systemjob.SystemJobService"
+136-->[androidx.work:work-runtime:2.9.0] /home/gabriel/.gradle/caches/transforms-3/795cfc56b0370abf8ccaac2477cf15fd/transformed/work-runtime-2.9.0/AndroidManifest.xml:47:13-84
+137            android:directBootAware="false"
+137-->[androidx.work:work-runtime:2.9.0] /home/gabriel/.gradle/caches/transforms-3/795cfc56b0370abf8ccaac2477cf15fd/transformed/work-runtime-2.9.0/AndroidManifest.xml:48:13-44
+138            android:enabled="@bool/enable_system_job_service_default"
+138-->[androidx.work:work-runtime:2.9.0] /home/gabriel/.gradle/caches/transforms-3/795cfc56b0370abf8ccaac2477cf15fd/transformed/work-runtime-2.9.0/AndroidManifest.xml:49:13-70
+139            android:exported="true"
+139-->[androidx.work:work-runtime:2.9.0] /home/gabriel/.gradle/caches/transforms-3/795cfc56b0370abf8ccaac2477cf15fd/transformed/work-runtime-2.9.0/AndroidManifest.xml:50:13-36
+140            android:permission="android.permission.BIND_JOB_SERVICE" />
+140-->[androidx.work:work-runtime:2.9.0] /home/gabriel/.gradle/caches/transforms-3/795cfc56b0370abf8ccaac2477cf15fd/transformed/work-runtime-2.9.0/AndroidManifest.xml:51:13-69
+141        <service
+141-->[androidx.work:work-runtime:2.9.0] /home/gabriel/.gradle/caches/transforms-3/795cfc56b0370abf8ccaac2477cf15fd/transformed/work-runtime-2.9.0/AndroidManifest.xml:53:9-59:35
+142            android:name="androidx.work.impl.foreground.SystemForegroundService"
+142-->[androidx.work:work-runtime:2.9.0] /home/gabriel/.gradle/caches/transforms-3/795cfc56b0370abf8ccaac2477cf15fd/transformed/work-runtime-2.9.0/AndroidManifest.xml:54:13-81
+143            android:directBootAware="false"
+143-->[androidx.work:work-runtime:2.9.0] /home/gabriel/.gradle/caches/transforms-3/795cfc56b0370abf8ccaac2477cf15fd/transformed/work-runtime-2.9.0/AndroidManifest.xml:55:13-44
+144            android:enabled="@bool/enable_system_foreground_service_default"
+144-->[androidx.work:work-runtime:2.9.0] /home/gabriel/.gradle/caches/transforms-3/795cfc56b0370abf8ccaac2477cf15fd/transformed/work-runtime-2.9.0/AndroidManifest.xml:56:13-77
+145            android:exported="false" />
+145-->[androidx.work:work-runtime:2.9.0] /home/gabriel/.gradle/caches/transforms-3/795cfc56b0370abf8ccaac2477cf15fd/transformed/work-runtime-2.9.0/AndroidManifest.xml:57:13-37
+146
+147        <receiver
+147-->[androidx.work:work-runtime:2.9.0] /home/gabriel/.gradle/caches/transforms-3/795cfc56b0370abf8ccaac2477cf15fd/transformed/work-runtime-2.9.0/AndroidManifest.xml:61:9-66:35
+148            android:name="androidx.work.impl.utils.ForceStopRunnable$BroadcastReceiver"
+148-->[androidx.work:work-runtime:2.9.0] /home/gabriel/.gradle/caches/transforms-3/795cfc56b0370abf8ccaac2477cf15fd/transformed/work-runtime-2.9.0/AndroidManifest.xml:62:13-88
+149            android:directBootAware="false"
+149-->[androidx.work:work-runtime:2.9.0] /home/gabriel/.gradle/caches/transforms-3/795cfc56b0370abf8ccaac2477cf15fd/transformed/work-runtime-2.9.0/AndroidManifest.xml:63:13-44
+150            android:enabled="true"
+150-->[androidx.work:work-runtime:2.9.0] /home/gabriel/.gradle/caches/transforms-3/795cfc56b0370abf8ccaac2477cf15fd/transformed/work-runtime-2.9.0/AndroidManifest.xml:64:13-35
+151            android:exported="false" />
+151-->[androidx.work:work-runtime:2.9.0] /home/gabriel/.gradle/caches/transforms-3/795cfc56b0370abf8ccaac2477cf15fd/transformed/work-runtime-2.9.0/AndroidManifest.xml:65:13-37
+152        <receiver
+152-->[androidx.work:work-runtime:2.9.0] /home/gabriel/.gradle/caches/transforms-3/795cfc56b0370abf8ccaac2477cf15fd/transformed/work-runtime-2.9.0/AndroidManifest.xml:67:9-77:20
+153            android:name="androidx.work.impl.background.systemalarm.ConstraintProxy$BatteryChargingProxy"
+153-->[androidx.work:work-runtime:2.9.0] /home/gabriel/.gradle/caches/transforms-3/795cfc56b0370abf8ccaac2477cf15fd/transformed/work-runtime-2.9.0/AndroidManifest.xml:68:13-106
+154            android:directBootAware="false"
+154-->[androidx.work:work-runtime:2.9.0] /home/gabriel/.gradle/caches/transforms-3/795cfc56b0370abf8ccaac2477cf15fd/transformed/work-runtime-2.9.0/AndroidManifest.xml:69:13-44
+155            android:enabled="false"
+155-->[androidx.work:work-runtime:2.9.0] /home/gabriel/.gradle/caches/transforms-3/795cfc56b0370abf8ccaac2477cf15fd/transformed/work-runtime-2.9.0/AndroidManifest.xml:70:13-36
+156            android:exported="false" >
+156-->[androidx.work:work-runtime:2.9.0] /home/gabriel/.gradle/caches/transforms-3/795cfc56b0370abf8ccaac2477cf15fd/transformed/work-runtime-2.9.0/AndroidManifest.xml:71:13-37
+157            <intent-filter>
+157-->[androidx.work:work-runtime:2.9.0] /home/gabriel/.gradle/caches/transforms-3/795cfc56b0370abf8ccaac2477cf15fd/transformed/work-runtime-2.9.0/AndroidManifest.xml:73:13-76:29
+158                <action android:name="android.intent.action.ACTION_POWER_CONNECTED" />
+158-->[androidx.work:work-runtime:2.9.0] /home/gabriel/.gradle/caches/transforms-3/795cfc56b0370abf8ccaac2477cf15fd/transformed/work-runtime-2.9.0/AndroidManifest.xml:74:17-87
+158-->[androidx.work:work-runtime:2.9.0] /home/gabriel/.gradle/caches/transforms-3/795cfc56b0370abf8ccaac2477cf15fd/transformed/work-runtime-2.9.0/AndroidManifest.xml:74:25-84
+159                <action android:name="android.intent.action.ACTION_POWER_DISCONNECTED" />
+159-->[androidx.work:work-runtime:2.9.0] /home/gabriel/.gradle/caches/transforms-3/795cfc56b0370abf8ccaac2477cf15fd/transformed/work-runtime-2.9.0/AndroidManifest.xml:75:17-90
+159-->[androidx.work:work-runtime:2.9.0] /home/gabriel/.gradle/caches/transforms-3/795cfc56b0370abf8ccaac2477cf15fd/transformed/work-runtime-2.9.0/AndroidManifest.xml:75:25-87
+160            </intent-filter>
+161        </receiver>
+162        <receiver
+162-->[androidx.work:work-runtime:2.9.0] /home/gabriel/.gradle/caches/transforms-3/795cfc56b0370abf8ccaac2477cf15fd/transformed/work-runtime-2.9.0/AndroidManifest.xml:78:9-88:20
+163            android:name="androidx.work.impl.background.systemalarm.ConstraintProxy$BatteryNotLowProxy"
+163-->[androidx.work:work-runtime:2.9.0] /home/gabriel/.gradle/caches/transforms-3/795cfc56b0370abf8ccaac2477cf15fd/transformed/work-runtime-2.9.0/AndroidManifest.xml:79:13-104
+164            android:directBootAware="false"
+164-->[androidx.work:work-runtime:2.9.0] /home/gabriel/.gradle/caches/transforms-3/795cfc56b0370abf8ccaac2477cf15fd/transformed/work-runtime-2.9.0/AndroidManifest.xml:80:13-44
+165            android:enabled="false"
+165-->[androidx.work:work-runtime:2.9.0] /home/gabriel/.gradle/caches/transforms-3/795cfc56b0370abf8ccaac2477cf15fd/transformed/work-runtime-2.9.0/AndroidManifest.xml:81:13-36
+166            android:exported="false" >
+166-->[androidx.work:work-runtime:2.9.0] /home/gabriel/.gradle/caches/transforms-3/795cfc56b0370abf8ccaac2477cf15fd/transformed/work-runtime-2.9.0/AndroidManifest.xml:82:13-37
+167            <intent-filter>
+167-->[androidx.work:work-runtime:2.9.0] /home/gabriel/.gradle/caches/transforms-3/795cfc56b0370abf8ccaac2477cf15fd/transformed/work-runtime-2.9.0/AndroidManifest.xml:84:13-87:29
+168                <action android:name="android.intent.action.BATTERY_OKAY" />
+168-->[androidx.work:work-runtime:2.9.0] /home/gabriel/.gradle/caches/transforms-3/795cfc56b0370abf8ccaac2477cf15fd/transformed/work-runtime-2.9.0/AndroidManifest.xml:85:17-77
+168-->[androidx.work:work-runtime:2.9.0] /home/gabriel/.gradle/caches/transforms-3/795cfc56b0370abf8ccaac2477cf15fd/transformed/work-runtime-2.9.0/AndroidManifest.xml:85:25-74
+169                <action android:name="android.intent.action.BATTERY_LOW" />
+169-->[androidx.work:work-runtime:2.9.0] /home/gabriel/.gradle/caches/transforms-3/795cfc56b0370abf8ccaac2477cf15fd/transformed/work-runtime-2.9.0/AndroidManifest.xml:86:17-76
+169-->[androidx.work:work-runtime:2.9.0] /home/gabriel/.gradle/caches/transforms-3/795cfc56b0370abf8ccaac2477cf15fd/transformed/work-runtime-2.9.0/AndroidManifest.xml:86:25-73
+170            </intent-filter>
+171        </receiver>
+172        <receiver
+172-->[androidx.work:work-runtime:2.9.0] /home/gabriel/.gradle/caches/transforms-3/795cfc56b0370abf8ccaac2477cf15fd/transformed/work-runtime-2.9.0/AndroidManifest.xml:89:9-99:20
+173            android:name="androidx.work.impl.background.systemalarm.ConstraintProxy$StorageNotLowProxy"
+173-->[androidx.work:work-runtime:2.9.0] /home/gabriel/.gradle/caches/transforms-3/795cfc56b0370abf8ccaac2477cf15fd/transformed/work-runtime-2.9.0/AndroidManifest.xml:90:13-104
+174            android:directBootAware="false"
+174-->[androidx.work:work-runtime:2.9.0] /home/gabriel/.gradle/caches/transforms-3/795cfc56b0370abf8ccaac2477cf15fd/transformed/work-runtime-2.9.0/AndroidManifest.xml:91:13-44
+175            android:enabled="false"
+175-->[androidx.work:work-runtime:2.9.0] /home/gabriel/.gradle/caches/transforms-3/795cfc56b0370abf8ccaac2477cf15fd/transformed/work-runtime-2.9.0/AndroidManifest.xml:92:13-36
+176            android:exported="false" >
+176-->[androidx.work:work-runtime:2.9.0] /home/gabriel/.gradle/caches/transforms-3/795cfc56b0370abf8ccaac2477cf15fd/transformed/work-runtime-2.9.0/AndroidManifest.xml:93:13-37
+177            <intent-filter>
+177-->[androidx.work:work-runtime:2.9.0] /home/gabriel/.gradle/caches/transforms-3/795cfc56b0370abf8ccaac2477cf15fd/transformed/work-runtime-2.9.0/AndroidManifest.xml:95:13-98:29
+178                <action android:name="android.intent.action.DEVICE_STORAGE_LOW" />
+178-->[androidx.work:work-runtime:2.9.0] /home/gabriel/.gradle/caches/transforms-3/795cfc56b0370abf8ccaac2477cf15fd/transformed/work-runtime-2.9.0/AndroidManifest.xml:96:17-83
+178-->[androidx.work:work-runtime:2.9.0] /home/gabriel/.gradle/caches/transforms-3/795cfc56b0370abf8ccaac2477cf15fd/transformed/work-runtime-2.9.0/AndroidManifest.xml:96:25-80
+179                <action android:name="android.intent.action.DEVICE_STORAGE_OK" />
+179-->[androidx.work:work-runtime:2.9.0] /home/gabriel/.gradle/caches/transforms-3/795cfc56b0370abf8ccaac2477cf15fd/transformed/work-runtime-2.9.0/AndroidManifest.xml:97:17-82
+179-->[androidx.work:work-runtime:2.9.0] /home/gabriel/.gradle/caches/transforms-3/795cfc56b0370abf8ccaac2477cf15fd/transformed/work-runtime-2.9.0/AndroidManifest.xml:97:25-79
+180            </intent-filter>
+181        </receiver>
+182        <receiver
+182-->[androidx.work:work-runtime:2.9.0] /home/gabriel/.gradle/caches/transforms-3/795cfc56b0370abf8ccaac2477cf15fd/transformed/work-runtime-2.9.0/AndroidManifest.xml:100:9-109:20
+183            android:name="androidx.work.impl.background.systemalarm.ConstraintProxy$NetworkStateProxy"
+183-->[androidx.work:work-runtime:2.9.0] /home/gabriel/.gradle/caches/transforms-3/795cfc56b0370abf8ccaac2477cf15fd/transformed/work-runtime-2.9.0/AndroidManifest.xml:101:13-103
+184            android:directBootAware="false"
+184-->[androidx.work:work-runtime:2.9.0] /home/gabriel/.gradle/caches/transforms-3/795cfc56b0370abf8ccaac2477cf15fd/transformed/work-runtime-2.9.0/AndroidManifest.xml:102:13-44
+185            android:enabled="false"
+185-->[androidx.work:work-runtime:2.9.0] /home/gabriel/.gradle/caches/transforms-3/795cfc56b0370abf8ccaac2477cf15fd/transformed/work-runtime-2.9.0/AndroidManifest.xml:103:13-36
+186            android:exported="false" >
+186-->[androidx.work:work-runtime:2.9.0] /home/gabriel/.gradle/caches/transforms-3/795cfc56b0370abf8ccaac2477cf15fd/transformed/work-runtime-2.9.0/AndroidManifest.xml:104:13-37
+187            <intent-filter>
+187-->[androidx.work:work-runtime:2.9.0] /home/gabriel/.gradle/caches/transforms-3/795cfc56b0370abf8ccaac2477cf15fd/transformed/work-runtime-2.9.0/AndroidManifest.xml:106:13-108:29
+188                <action android:name="android.net.conn.CONNECTIVITY_CHANGE" />
+188-->[androidx.work:work-runtime:2.9.0] /home/gabriel/.gradle/caches/transforms-3/795cfc56b0370abf8ccaac2477cf15fd/transformed/work-runtime-2.9.0/AndroidManifest.xml:107:17-79
+188-->[androidx.work:work-runtime:2.9.0] /home/gabriel/.gradle/caches/transforms-3/795cfc56b0370abf8ccaac2477cf15fd/transformed/work-runtime-2.9.0/AndroidManifest.xml:107:25-76
+189            </intent-filter>
+190        </receiver>
+191        <receiver
+191-->[androidx.work:work-runtime:2.9.0] /home/gabriel/.gradle/caches/transforms-3/795cfc56b0370abf8ccaac2477cf15fd/transformed/work-runtime-2.9.0/AndroidManifest.xml:110:9-121:20
+192            android:name="androidx.work.impl.background.systemalarm.RescheduleReceiver"
+192-->[androidx.work:work-runtime:2.9.0] /home/gabriel/.gradle/caches/transforms-3/795cfc56b0370abf8ccaac2477cf15fd/transformed/work-runtime-2.9.0/AndroidManifest.xml:111:13-88
+193            android:directBootAware="false"
+193-->[androidx.work:work-runtime:2.9.0] /home/gabriel/.gradle/caches/transforms-3/795cfc56b0370abf8ccaac2477cf15fd/transformed/work-runtime-2.9.0/AndroidManifest.xml:112:13-44
+194            android:enabled="false"
+194-->[androidx.work:work-runtime:2.9.0] /home/gabriel/.gradle/caches/transforms-3/795cfc56b0370abf8ccaac2477cf15fd/transformed/work-runtime-2.9.0/AndroidManifest.xml:113:13-36
+195            android:exported="false" >
+195-->[androidx.work:work-runtime:2.9.0] /home/gabriel/.gradle/caches/transforms-3/795cfc56b0370abf8ccaac2477cf15fd/transformed/work-runtime-2.9.0/AndroidManifest.xml:114:13-37
+196            <intent-filter>
+196-->[androidx.work:work-runtime:2.9.0] /home/gabriel/.gradle/caches/transforms-3/795cfc56b0370abf8ccaac2477cf15fd/transformed/work-runtime-2.9.0/AndroidManifest.xml:116:13-120:29
+197                <action android:name="android.intent.action.BOOT_COMPLETED" />
+197-->[androidx.work:work-runtime:2.9.0] /home/gabriel/.gradle/caches/transforms-3/795cfc56b0370abf8ccaac2477cf15fd/transformed/work-runtime-2.9.0/AndroidManifest.xml:117:17-79
+197-->[androidx.work:work-runtime:2.9.0] /home/gabriel/.gradle/caches/transforms-3/795cfc56b0370abf8ccaac2477cf15fd/transformed/work-runtime-2.9.0/AndroidManifest.xml:117:25-76
+198                <action android:name="android.intent.action.TIME_SET" />
+198-->[androidx.work:work-runtime:2.9.0] /home/gabriel/.gradle/caches/transforms-3/795cfc56b0370abf8ccaac2477cf15fd/transformed/work-runtime-2.9.0/AndroidManifest.xml:118:17-73
+198-->[androidx.work:work-runtime:2.9.0] /home/gabriel/.gradle/caches/transforms-3/795cfc56b0370abf8ccaac2477cf15fd/transformed/work-runtime-2.9.0/AndroidManifest.xml:118:25-70
+199                <action android:name="android.intent.action.TIMEZONE_CHANGED" />
+199-->[androidx.work:work-runtime:2.9.0] /home/gabriel/.gradle/caches/transforms-3/795cfc56b0370abf8ccaac2477cf15fd/transformed/work-runtime-2.9.0/AndroidManifest.xml:119:17-81
+199-->[androidx.work:work-runtime:2.9.0] /home/gabriel/.gradle/caches/transforms-3/795cfc56b0370abf8ccaac2477cf15fd/transformed/work-runtime-2.9.0/AndroidManifest.xml:119:25-78
+200            </intent-filter>
+201        </receiver>
+202        <receiver
+202-->[androidx.work:work-runtime:2.9.0] /home/gabriel/.gradle/caches/transforms-3/795cfc56b0370abf8ccaac2477cf15fd/transformed/work-runtime-2.9.0/AndroidManifest.xml:122:9-131:20
+203            android:name="androidx.work.impl.background.systemalarm.ConstraintProxyUpdateReceiver"
+203-->[androidx.work:work-runtime:2.9.0] /home/gabriel/.gradle/caches/transforms-3/795cfc56b0370abf8ccaac2477cf15fd/transformed/work-runtime-2.9.0/AndroidManifest.xml:123:13-99
+204            android:directBootAware="false"
+204-->[androidx.work:work-runtime:2.9.0] /home/gabriel/.gradle/caches/transforms-3/795cfc56b0370abf8ccaac2477cf15fd/transformed/work-runtime-2.9.0/AndroidManifest.xml:124:13-44
+205            android:enabled="@bool/enable_system_alarm_service_default"
+205-->[androidx.work:work-runtime:2.9.0] /home/gabriel/.gradle/caches/transforms-3/795cfc56b0370abf8ccaac2477cf15fd/transformed/work-runtime-2.9.0/AndroidManifest.xml:125:13-72
+206            android:exported="false" >
+206-->[androidx.work:work-runtime:2.9.0] /home/gabriel/.gradle/caches/transforms-3/795cfc56b0370abf8ccaac2477cf15fd/transformed/work-runtime-2.9.0/AndroidManifest.xml:126:13-37
+207            <intent-filter>
+207-->[androidx.work:work-runtime:2.9.0] /home/gabriel/.gradle/caches/transforms-3/795cfc56b0370abf8ccaac2477cf15fd/transformed/work-runtime-2.9.0/AndroidManifest.xml:128:13-130:29
+208                <action android:name="androidx.work.impl.background.systemalarm.UpdateProxies" />
+208-->[androidx.work:work-runtime:2.9.0] /home/gabriel/.gradle/caches/transforms-3/795cfc56b0370abf8ccaac2477cf15fd/transformed/work-runtime-2.9.0/AndroidManifest.xml:129:17-98
+208-->[androidx.work:work-runtime:2.9.0] /home/gabriel/.gradle/caches/transforms-3/795cfc56b0370abf8ccaac2477cf15fd/transformed/work-runtime-2.9.0/AndroidManifest.xml:129:25-95
+209            </intent-filter>
+210        </receiver>
+211        <receiver
+211-->[androidx.work:work-runtime:2.9.0] /home/gabriel/.gradle/caches/transforms-3/795cfc56b0370abf8ccaac2477cf15fd/transformed/work-runtime-2.9.0/AndroidManifest.xml:132:9-142:20
+212            android:name="androidx.work.impl.diagnostics.DiagnosticsReceiver"
+212-->[androidx.work:work-runtime:2.9.0] /home/gabriel/.gradle/caches/transforms-3/795cfc56b0370abf8ccaac2477cf15fd/transformed/work-runtime-2.9.0/AndroidManifest.xml:133:13-78
+213            android:directBootAware="false"
+213-->[androidx.work:work-runtime:2.9.0] /home/gabriel/.gradle/caches/transforms-3/795cfc56b0370abf8ccaac2477cf15fd/transformed/work-runtime-2.9.0/AndroidManifest.xml:134:13-44
+214            android:enabled="true"
+214-->[androidx.work:work-runtime:2.9.0] /home/gabriel/.gradle/caches/transforms-3/795cfc56b0370abf8ccaac2477cf15fd/transformed/work-runtime-2.9.0/AndroidManifest.xml:135:13-35
+215            android:exported="true"
+215-->[androidx.work:work-runtime:2.9.0] /home/gabriel/.gradle/caches/transforms-3/795cfc56b0370abf8ccaac2477cf15fd/transformed/work-runtime-2.9.0/AndroidManifest.xml:136:13-36
+216            android:permission="android.permission.DUMP" >
+216-->[androidx.work:work-runtime:2.9.0] /home/gabriel/.gradle/caches/transforms-3/795cfc56b0370abf8ccaac2477cf15fd/transformed/work-runtime-2.9.0/AndroidManifest.xml:137:13-57
+217            <intent-filter>
+217-->[androidx.work:work-runtime:2.9.0] /home/gabriel/.gradle/caches/transforms-3/795cfc56b0370abf8ccaac2477cf15fd/transformed/work-runtime-2.9.0/AndroidManifest.xml:139:13-141:29
+218                <action android:name="androidx.work.diagnostics.REQUEST_DIAGNOSTICS" />
+218-->[androidx.work:work-runtime:2.9.0] /home/gabriel/.gradle/caches/transforms-3/795cfc56b0370abf8ccaac2477cf15fd/transformed/work-runtime-2.9.0/AndroidManifest.xml:140:17-88
+218-->[androidx.work:work-runtime:2.9.0] /home/gabriel/.gradle/caches/transforms-3/795cfc56b0370abf8ccaac2477cf15fd/transformed/work-runtime-2.9.0/AndroidManifest.xml:140:25-85
+219            </intent-filter>
+220        </receiver>
+221
+222        <activity
+222-->[androidx.compose.ui:ui-test-manifest:1.5.4] /home/gabriel/.gradle/caches/transforms-3/6e78813e9bffd2c2a75e45fd8305dc50/transformed/jetified-ui-test-manifest-1.5.4/AndroidManifest.xml:23:9-25:39
+223            android:name="androidx.activity.ComponentActivity"
+223-->[androidx.compose.ui:ui-test-manifest:1.5.4] /home/gabriel/.gradle/caches/transforms-3/6e78813e9bffd2c2a75e45fd8305dc50/transformed/jetified-ui-test-manifest-1.5.4/AndroidManifest.xml:24:13-63
+224            android:exported="true" />
+224-->[androidx.compose.ui:ui-test-manifest:1.5.4] /home/gabriel/.gradle/caches/transforms-3/6e78813e9bffd2c2a75e45fd8305dc50/transformed/jetified-ui-test-manifest-1.5.4/AndroidManifest.xml:25:13-36
+225        <activity
+225-->[androidx.compose.ui:ui-tooling-android:1.5.4] /home/gabriel/.gradle/caches/transforms-3/302289d9f82de1ba5cb1b0f6032a8b32/transformed/jetified-ui-tooling-release/AndroidManifest.xml:23:9-25:39
+226            android:name="androidx.compose.ui.tooling.PreviewActivity"
+226-->[androidx.compose.ui:ui-tooling-android:1.5.4] /home/gabriel/.gradle/caches/transforms-3/302289d9f82de1ba5cb1b0f6032a8b32/transformed/jetified-ui-tooling-release/AndroidManifest.xml:24:13-71
+227            android:exported="true" />
+227-->[androidx.compose.ui:ui-tooling-android:1.5.4] /home/gabriel/.gradle/caches/transforms-3/302289d9f82de1ba5cb1b0f6032a8b32/transformed/jetified-ui-tooling-release/AndroidManifest.xml:25:13-36
+228
+229        <service
+229-->[androidx.room:room-runtime:2.5.0] /home/gabriel/.gradle/caches/transforms-3/12e214935c6d9bf58d06a8a8dcea489e/transformed/room-runtime-2.5.0/AndroidManifest.xml:24:9-28:63
+230            android:name="androidx.room.MultiInstanceInvalidationService"
+230-->[androidx.room:room-runtime:2.5.0] /home/gabriel/.gradle/caches/transforms-3/12e214935c6d9bf58d06a8a8dcea489e/transformed/room-runtime-2.5.0/AndroidManifest.xml:25:13-74
+231            android:directBootAware="true"
+231-->[androidx.room:room-runtime:2.5.0] /home/gabriel/.gradle/caches/transforms-3/12e214935c6d9bf58d06a8a8dcea489e/transformed/room-runtime-2.5.0/AndroidManifest.xml:26:13-43
+232            android:exported="false" />
+232-->[androidx.room:room-runtime:2.5.0] /home/gabriel/.gradle/caches/transforms-3/12e214935c6d9bf58d06a8a8dcea489e/transformed/room-runtime-2.5.0/AndroidManifest.xml:27:13-37
+233
+234        <receiver
+234-->[androidx.profileinstaller:profileinstaller:1.3.1] /home/gabriel/.gradle/caches/transforms-3/5075e54ed647344dbc01dc103af60b96/transformed/jetified-profileinstaller-1.3.1/AndroidManifest.xml:34:9-52:20
+235            android:name="androidx.profileinstaller.ProfileInstallReceiver"
+235-->[androidx.profileinstaller:profileinstaller:1.3.1] /home/gabriel/.gradle/caches/transforms-3/5075e54ed647344dbc01dc103af60b96/transformed/jetified-profileinstaller-1.3.1/AndroidManifest.xml:35:13-76
+236            android:directBootAware="false"
+236-->[androidx.profileinstaller:profileinstaller:1.3.1] /home/gabriel/.gradle/caches/transforms-3/5075e54ed647344dbc01dc103af60b96/transformed/jetified-profileinstaller-1.3.1/AndroidManifest.xml:36:13-44
+237            android:enabled="true"
+237-->[androidx.profileinstaller:profileinstaller:1.3.1] /home/gabriel/.gradle/caches/transforms-3/5075e54ed647344dbc01dc103af60b96/transformed/jetified-profileinstaller-1.3.1/AndroidManifest.xml:37:13-35
+238            android:exported="true"
+238-->[androidx.profileinstaller:profileinstaller:1.3.1] /home/gabriel/.gradle/caches/transforms-3/5075e54ed647344dbc01dc103af60b96/transformed/jetified-profileinstaller-1.3.1/AndroidManifest.xml:38:13-36
+239            android:permission="android.permission.DUMP" >
+239-->[androidx.profileinstaller:profileinstaller:1.3.1] /home/gabriel/.gradle/caches/transforms-3/5075e54ed647344dbc01dc103af60b96/transformed/jetified-profileinstaller-1.3.1/AndroidManifest.xml:39:13-57
+240            <intent-filter>
+240-->[androidx.profileinstaller:profileinstaller:1.3.1] /home/gabriel/.gradle/caches/transforms-3/5075e54ed647344dbc01dc103af60b96/transformed/jetified-profileinstaller-1.3.1/AndroidManifest.xml:40:13-42:29
+241                <action android:name="androidx.profileinstaller.action.INSTALL_PROFILE" />
+241-->[androidx.profileinstaller:profileinstaller:1.3.1] /home/gabriel/.gradle/caches/transforms-3/5075e54ed647344dbc01dc103af60b96/transformed/jetified-profileinstaller-1.3.1/AndroidManifest.xml:41:17-91
+241-->[androidx.profileinstaller:profileinstaller:1.3.1] /home/gabriel/.gradle/caches/transforms-3/5075e54ed647344dbc01dc103af60b96/transformed/jetified-profileinstaller-1.3.1/AndroidManifest.xml:41:25-88
+242            </intent-filter>
+243            <intent-filter>
+243-->[androidx.profileinstaller:profileinstaller:1.3.1] /home/gabriel/.gradle/caches/transforms-3/5075e54ed647344dbc01dc103af60b96/transformed/jetified-profileinstaller-1.3.1/AndroidManifest.xml:43:13-45:29
+244                <action android:name="androidx.profileinstaller.action.SKIP_FILE" />
+244-->[androidx.profileinstaller:profileinstaller:1.3.1] /home/gabriel/.gradle/caches/transforms-3/5075e54ed647344dbc01dc103af60b96/transformed/jetified-profileinstaller-1.3.1/AndroidManifest.xml:44:17-85
+244-->[androidx.profileinstaller:profileinstaller:1.3.1] /home/gabriel/.gradle/caches/transforms-3/5075e54ed647344dbc01dc103af60b96/transformed/jetified-profileinstaller-1.3.1/AndroidManifest.xml:44:25-82
+245            </intent-filter>
+246            <intent-filter>
+246-->[androidx.profileinstaller:profileinstaller:1.3.1] /home/gabriel/.gradle/caches/transforms-3/5075e54ed647344dbc01dc103af60b96/transformed/jetified-profileinstaller-1.3.1/AndroidManifest.xml:46:13-48:29
+247                <action android:name="androidx.profileinstaller.action.SAVE_PROFILE" />
+247-->[androidx.profileinstaller:profileinstaller:1.3.1] /home/gabriel/.gradle/caches/transforms-3/5075e54ed647344dbc01dc103af60b96/transformed/jetified-profileinstaller-1.3.1/AndroidManifest.xml:47:17-88
+247-->[androidx.profileinstaller:profileinstaller:1.3.1] /home/gabriel/.gradle/caches/transforms-3/5075e54ed647344dbc01dc103af60b96/transformed/jetified-profileinstaller-1.3.1/AndroidManifest.xml:47:25-85
+248            </intent-filter>
+249            <intent-filter>
+249-->[androidx.profileinstaller:profileinstaller:1.3.1] /home/gabriel/.gradle/caches/transforms-3/5075e54ed647344dbc01dc103af60b96/transformed/jetified-profileinstaller-1.3.1/AndroidManifest.xml:49:13-51:29
+250                <action android:name="androidx.profileinstaller.action.BENCHMARK_OPERATION" />
+250-->[androidx.profileinstaller:profileinstaller:1.3.1] /home/gabriel/.gradle/caches/transforms-3/5075e54ed647344dbc01dc103af60b96/transformed/jetified-profileinstaller-1.3.1/AndroidManifest.xml:50:17-95
+250-->[androidx.profileinstaller:profileinstaller:1.3.1] /home/gabriel/.gradle/caches/transforms-3/5075e54ed647344dbc01dc103af60b96/transformed/jetified-profileinstaller-1.3.1/AndroidManifest.xml:50:25-92
+251            </intent-filter>
+252        </receiver>
+253    </application>
+254
+255</manifest>

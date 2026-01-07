@@ -3,25 +3,17 @@ package com.vivacomigo.app.data.model
 data class User(
     val id: String = "",
     val email: String = "",
-    val pairingCode: String = "",
-    val partnerId: String? = null,
-    val displayName: String = ""
+    val pairing_code: String = "",
+    val partner_id: String? = null,
+    val display_name: String = ""
 ) {
-    fun toMap(): Map<String, Any?> = mapOf(
-        "id" to id,
-        "email" to email,
-        "pairingCode" to pairingCode,
-        "partnerId" to partnerId,
-        "displayName" to displayName
-    )
-
-    companion object {
-        fun fromMap(map: Map<String, Any?>): User = User(
-            id = map["id"] as? String ?: "",
-            email = map["email"] as? String ?: "",
-            pairingCode = map["pairingCode"] as? String ?: "",
-            partnerId = map["partnerId"] as? String,
-            displayName = map["displayName"] as? String ?: ""
-        )
-    }
+    // Propriedades computadas para compatibilidade com código existente
+    val pairingCode: String
+        get() = pairing_code
+    
+    val partnerId: String?
+        get() = partner_id
+    
+    val displayName: String
+        get() = display_name
 }

@@ -6,16 +6,12 @@ import androidx.work.ExistingPeriodicWorkPolicy
 import androidx.work.NetworkType
 import androidx.work.PeriodicWorkRequestBuilder
 import androidx.work.WorkManager
-import com.google.firebase.FirebaseApp
 import com.vivacomigo.app.widget.PhotoWidgetWorker
 import java.util.concurrent.TimeUnit
 
 class VivaApp : Application() {
     override fun onCreate() {
         super.onCreate()
-
-        // Initialize Firebase
-        FirebaseApp.initializeApp(this)
 
         // Schedule widget updates
         scheduleWidgetUpdates()

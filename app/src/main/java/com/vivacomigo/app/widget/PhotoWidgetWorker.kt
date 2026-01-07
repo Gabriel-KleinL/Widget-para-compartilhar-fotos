@@ -4,9 +4,9 @@ import android.content.Context
 import androidx.glance.appwidget.GlanceAppWidgetManager
 import androidx.work.CoroutineWorker
 import androidx.work.WorkerParameters
-import com.google.firebase.auth.FirebaseAuth
+import com.vivacomigo.app.data.repository.AuthRepository
 import com.vivacomigo.app.data.repository.PhotoRepository
-import kotlinx.coroutines.flow.first
+import com.vivacomigo.app.data.repository.UserRepository
 
 class PhotoWidgetWorker(
     private val context: Context,
@@ -14,16 +14,21 @@ class PhotoWidgetWorker(
 ) : CoroutineWorker(context, params) {
 
     override suspend fun doWork(): Result {
-        val userId = FirebaseAuth.getInstance().currentUser?.uid ?: return Result.failure()
-        val photoRepository = PhotoRepository()
+        val authRepository = AuthRepository(context)
+        
+        // Garantir que existe um usuário local
+        val userResult = authRepository.ensureLocalUser()
+        val userId = userResult.getOrNull()?.id ?: return Result.failure()
+
+        val photoRepository = PhotoRepository(context)
 
         return try {
             // Get latest photo
-            val photo = photoRepository.getLatestPhotoForUser(userId).first()
+            val photo = photoRepository.getLatestPhotoForUser(userId)
 
-            // Save to DataStore
-            photo?.imageUrl?.let { url ->
-                PhotoWidgetDataStore.savePhotoUrl(context, url)
+            // Save photo ID to DataStore
+            photo?.id?.let { photoId ->
+                PhotoWidgetDataStore.savePhotoId(context, photoId)
             }
 
             // Update widget

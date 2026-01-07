@@ -1,23 +1,28 @@
 package com.vivacomigo.app.ui.viewmodel
 
+import android.app.Application
 import android.net.Uri
-import androidx.lifecycle.ViewModel
+import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
-import com.google.firebase.auth.FirebaseAuth
+import androidx.glance.appwidget.GlanceAppWidgetManager
 import com.vivacomigo.app.data.model.Photo
 import com.vivacomigo.app.data.model.User
 import com.vivacomigo.app.data.repository.AuthRepository
 import com.vivacomigo.app.data.repository.PhotoRepository
 import com.vivacomigo.app.data.repository.UserRepository
+import com.vivacomigo.app.widget.PhotoWidget
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.launch
 
 sealed class AuthState {
     object Loading : AuthState()
-    object NotAuthenticated : AuthState()
-    data class Authenticated(val user: User) : AuthState()
+    data class Ready(val user: User) : AuthState() // Usuário sempre pronto, não precisa de autenticação
+    data class Error(val message: String) : AuthState() // Erro de conexão
 }
 
 data class MainUiState(
@@ -25,44 +30,38 @@ data class MainUiState(
     val currentUser: User? = null,
     val partner: User? = null,
     val latestPhoto: Photo? = null,
+    val latestPhotoUri: Uri? = null, // URI da imagem em cache
     val isLoading: Boolean = false,
-    val error: String? = null
+    val error: String? = null,
+    val successMessage: String? = null // Mensagem de sucesso (ex: foto enviada)
 )
 
-class MainViewModel : ViewModel() {
-    private val authRepository = AuthRepository()
-    private val userRepository = UserRepository()
-    private val photoRepository = PhotoRepository()
+class MainViewModel(application: Application) : AndroidViewModel(application) {
+    private val context = application.applicationContext
+    private val authRepository = AuthRepository(context)
+    private val userRepository = UserRepository(context)
+    private val photoRepository = PhotoRepository(context)
 
     private val _uiState = MutableStateFlow(MainUiState())
     val uiState: StateFlow<MainUiState> = _uiState.asStateFlow()
 
+    private var pollingJob: Job? = null
+    private val POLLING_INTERVAL = 30_000L // 30 segundos
+
     init {
-        checkAuthState()
+        loadUserData()
     }
 
-    private fun checkAuthState() {
+    private fun loadUserData() {
         viewModelScope.launch {
-            val firebaseUser = authRepository.currentUser
-            if (firebaseUser != null) {
-                loadUserData(firebaseUser.uid)
-            } else {
-                _uiState.value = _uiState.value.copy(
-                    authState = AuthState.NotAuthenticated,
-                    isLoading = false
-                )
-            }
-        }
-    }
-
-    private fun loadUserData(userId: String) {
-        viewModelScope.launch {
-            // Load user
-            userRepository.getUserFlow(userId).collect { user ->
-                if (user != null) {
+            _uiState.value = _uiState.value.copy(isLoading = true)
+            
+            userRepository.getCurrentUser().fold(
+                onSuccess = { user ->
                     _uiState.value = _uiState.value.copy(
-                        authState = AuthState.Authenticated(user),
-                        currentUser = user
+                        authState = AuthState.Ready(user),
+                        currentUser = user,
+                        isLoading = false
                     )
 
                     // Load partner if exists
@@ -71,109 +70,144 @@ class MainViewModel : ViewModel() {
                     }
 
                     // Load latest photo
-                    loadLatestPhoto(userId)
+                    loadLatestPhoto()
+
+                    // Iniciar polling
+                    startPolling()
+                },
+                onFailure = { error ->
+                    android.util.Log.e("MainViewModel", "Erro ao carregar usuário: ${error.message}", error)
+                    val errorMessage = when {
+                        error.message?.contains("Communications link failure") == true -> 
+                            "Não foi possível conectar ao servidor. Verifique sua conexão com a internet."
+                        error.message?.contains("timeout") == true -> 
+                            "Tempo de conexão esgotado. Verifique sua conexão com a internet."
+                        else -> 
+                            "Erro ao conectar: ${error.message ?: "Erro desconhecido"}"
+                    }
+                    _uiState.value = _uiState.value.copy(
+                        authState = AuthState.Error(errorMessage),
+                        isLoading = false,
+                        error = errorMessage
+                    )
                 }
-            }
+            )
         }
+    }
+    
+    fun retryConnection() {
+        loadUserData()
     }
 
     private fun loadPartner(partnerId: String) {
         viewModelScope.launch {
-            userRepository.getUserFlow(partnerId).collect { partner ->
-                _uiState.value = _uiState.value.copy(partner = partner)
-            }
-        }
-    }
-
-    private fun loadLatestPhoto(userId: String) {
-        viewModelScope.launch {
-            photoRepository.getLatestPhotoForUser(userId).collect { photo ->
-                _uiState.value = _uiState.value.copy(latestPhoto = photo)
-            }
-        }
-    }
-
-    fun login(email: String, password: String) {
-        viewModelScope.launch {
-            _uiState.value = _uiState.value.copy(isLoading = true, error = null)
-            authRepository.login(email, password).fold(
-                onSuccess = { user ->
-                    loadUserData(user.uid)
+            userRepository.getUser(partnerId).fold(
+                onSuccess = { partner ->
+                    _uiState.value = _uiState.value.copy(partner = partner)
                 },
-                onFailure = { error ->
-                    _uiState.value = _uiState.value.copy(
-                        isLoading = false,
-                        error = error.message
-                    )
+                onFailure = {
+                    // Ignorar erro silenciosamente
                 }
             )
         }
     }
 
-    fun register(email: String, password: String) {
+    private fun loadLatestPhoto() {
         viewModelScope.launch {
-            _uiState.value = _uiState.value.copy(isLoading = true, error = null)
-            authRepository.register(email, password).fold(
-                onSuccess = { firebaseUser ->
-                    // Create user document
-                    val user = User(
-                        id = firebaseUser.uid,
-                        email = firebaseUser.email ?: "",
-                        pairingCode = authRepository.generatePairingCode(),
-                        displayName = firebaseUser.email?.substringBefore('@') ?: ""
-                    )
-                    userRepository.createUser(user)
-                    loadUserData(firebaseUser.uid)
-                },
-                onFailure = { error ->
-                    _uiState.value = _uiState.value.copy(
-                        isLoading = false,
-                        error = error.message
-                    )
+            try {
+                val currentUser = _uiState.value.currentUser ?: return@launch
+                val photo = photoRepository.getLatestPhotoForUser(currentUser.id)
+                
+                // Buscar imagem BLOB e converter para URI
+                val photoUri = photo?.let { p ->
+                    try {
+                        val imageBytes = photoRepository.getPhotoImage(p.id, currentUser.id)
+                        imageBytes?.let { bytes ->
+                            com.vivacomigo.app.data.repository.ImageHelper.saveImageToCache(
+                                context,
+                                bytes,
+                                p.id
+                            )
+                        }
+                    } catch (e: Exception) {
+                        android.util.Log.e("MainViewModel", "Erro ao carregar imagem: ${e.message}", e)
+                        null
+                    }
                 }
-            )
+                
+                _uiState.value = _uiState.value.copy(
+                    latestPhoto = photo,
+                    latestPhotoUri = photoUri
+                )
+            } catch (e: Exception) {
+                android.util.Log.e("MainViewModel", "Erro ao carregar última foto: ${e.message}", e)
+                // Não atualizar o estado em caso de erro para não quebrar a UI
+            }
         }
     }
 
-    fun logout() {
-        authRepository.logout()
-        _uiState.value = MainUiState(authState = AuthState.NotAuthenticated)
+    private fun startPolling() {
+        pollingJob?.cancel()
+        pollingJob = viewModelScope.launch {
+            while (true) {
+                delay(POLLING_INTERVAL)
+                if (_uiState.value.authState is AuthState.Ready) {
+                    loadLatestPhoto()
+                }
+            }
+        }
     }
 
     fun pairWithPartner(partnerCode: String) {
         viewModelScope.launch {
+            android.util.Log.d("MainViewModel", "pairWithPartner chamado com código: $partnerCode")
             _uiState.value = _uiState.value.copy(isLoading = true, error = null)
-            val currentUser = _uiState.value.currentUser ?: return@launch
+            val currentUser = _uiState.value.currentUser ?: run {
+                android.util.Log.e("MainViewModel", "currentUser é null!")
+                _uiState.value = _uiState.value.copy(
+                    isLoading = false,
+                    error = "Erro: usuário não encontrado"
+                )
+                return@launch
+            }
 
-            userRepository.findUserByPairingCode(partnerCode).fold(
-                onSuccess = { partner ->
-                    if (partner.id == currentUser.id) {
-                        _uiState.value = _uiState.value.copy(
-                            isLoading = false,
-                            error = "Você não pode parear consigo mesmo!"
-                        )
-                        return@fold
-                    }
+            android.util.Log.d("MainViewModel", "Usuário atual: ${currentUser.id}, código: ${currentUser.pairingCode}")
 
-                    userRepository.pairUsers(currentUser.id, partner.id).fold(
-                        onSuccess = {
-                            _uiState.value = _uiState.value.copy(
-                                isLoading = false,
-                                error = null
-                            )
-                        },
-                        onFailure = { error ->
-                            _uiState.value = _uiState.value.copy(
-                                isLoading = false,
-                                error = error.message
-                            )
-                        }
+            // Limpar espaços e converter para maiúsculas
+            val cleanCode = partnerCode.trim().uppercase()
+            
+            android.util.Log.d("MainViewModel", "Código limpo: $cleanCode")
+            
+            if (cleanCode.isEmpty()) {
+                android.util.Log.w("MainViewModel", "Código vazio")
+                _uiState.value = _uiState.value.copy(
+                    isLoading = false,
+                    error = "Código de pareamento não pode estar vazio"
+                )
+                return@launch
+            }
+
+            android.util.Log.d("MainViewModel", "Chamando userRepository.pairUsers...")
+            userRepository.pairUsers(currentUser.id, cleanCode).fold(
+                onSuccess = { updatedUser ->
+                    android.util.Log.d("MainViewModel", "Pareamento bem-sucedido! Novo partner_id: ${updatedUser.partnerId}")
+                    _uiState.value = _uiState.value.copy(
+                        authState = AuthState.Ready(updatedUser), // Atualizar authState também!
+                        currentUser = updatedUser,
+                        isLoading = false,
+                        error = null
                     )
+                    // Recarregar parceiro
+                    updatedUser.partnerId?.let { 
+                        android.util.Log.d("MainViewModel", "Carregando parceiro: $it")
+                        loadPartner(it) 
+                    }
                 },
                 onFailure = { error ->
+                    android.util.Log.e("MainViewModel", "Erro ao parear: ${error.message}", error)
                     _uiState.value = _uiState.value.copy(
                         isLoading = false,
-                        error = "Código inválido ou usuário não encontrado"
+                        error = error.message ?: "Erro ao parear usuários"
                     )
                 }
             )
@@ -190,16 +224,78 @@ class MainViewModel : ViewModel() {
                 onSuccess = {
                     _uiState.value = _uiState.value.copy(
                         isLoading = false,
-                        error = null
+                        error = null,
+                        successMessage = "Foto enviada com sucesso! ❤️"
                     )
+                    // Recarregar última foto após envio
+                    loadLatestPhoto()
+                    // Atualizar widget imediatamente
+                    updateWidget()
+                    // Limpar mensagem de sucesso após alguns segundos
+                    viewModelScope.launch {
+                        delay(3000)
+                        _uiState.value = _uiState.value.copy(successMessage = null)
+                    }
                 },
                 onFailure = { error ->
                     _uiState.value = _uiState.value.copy(
                         isLoading = false,
-                        error = error.message
+                        error = error.message ?: "Erro ao enviar foto"
                     )
                 }
             )
         }
+    }
+
+    fun unpairPartner() {
+        viewModelScope.launch {
+            _uiState.value = _uiState.value.copy(isLoading = true, error = null)
+            val currentUser = _uiState.value.currentUser ?: return@launch
+
+            userRepository.unpairUsers(currentUser.id).fold(
+                onSuccess = { updatedUser ->
+                    _uiState.value = _uiState.value.copy(
+                        authState = AuthState.Ready(updatedUser), // Atualizar authState também!
+                        currentUser = updatedUser,
+                        partner = null,
+                        isLoading = false,
+                        error = null
+                    )
+                    // Parar polling
+                    pollingJob?.cancel()
+                    pollingJob = null
+                    // Atualizar widget
+                    updateWidget()
+                },
+                onFailure = { error ->
+                    _uiState.value = _uiState.value.copy(
+                        isLoading = false,
+                        error = error.message ?: "Erro ao desparar"
+                    )
+                }
+            )
+        }
+    }
+    
+    private fun updateWidget() {
+        viewModelScope.launch {
+            try {
+                val glanceId = GlanceAppWidgetManager(context)
+                    .getGlanceIds(PhotoWidget::class.java)
+                    .firstOrNull()
+                
+                glanceId?.let {
+                    PhotoWidget().update(context, it)
+                    android.util.Log.d("MainViewModel", "Widget atualizado com sucesso")
+                }
+            } catch (e: Exception) {
+                android.util.Log.e("MainViewModel", "Erro ao atualizar widget: ${e.message}", e)
+            }
+        }
+    }
+
+    override fun onCleared() {
+        super.onCleared()
+        pollingJob?.cancel()
     }
 }

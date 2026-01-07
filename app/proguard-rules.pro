@@ -5,10 +5,10 @@
 # For more details, see
 #   http://developer.android.com/guide/developing/tools/proguard.html
 
-# Keep Firebase classes
--keep class com.google.firebase.** { *; }
--keep class com.google.android.gms.** { *; }
-
 # Keep widget classes
 -keep class * extends android.appwidget.AppWidgetProvider
 -keep class * extends androidx.glance.appwidget.GlanceAppWidget
+
+# Keep Ktor serialization
+-keep class kotlinx.serialization.** { *; }
+-keep class com.vivacomigo.app.data.model.** { *; }

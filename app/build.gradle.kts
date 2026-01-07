@@ -1,7 +1,6 @@
 plugins {
     id("com.android.application")
     id("org.jetbrains.kotlin.android")
-    id("com.google.gms.google-services")
 }
 
 android {
@@ -46,6 +45,13 @@ android {
     packaging {
         resources {
             excludes += "/META-INF/{AL2.0,LGPL2.1}"
+            excludes += "/META-INF/DEPENDENCIES"
+            excludes += "/META-INF/LICENSE"
+            excludes += "/META-INF/LICENSE.txt"
+            excludes += "/META-INF/license.txt"
+            excludes += "/META-INF/NOTICE"
+            excludes += "/META-INF/NOTICE.txt"
+            excludes += "/META-INF/notice.txt"
         }
     }
 }
@@ -64,14 +70,17 @@ dependencies {
     implementation("androidx.compose.material3:material3")
     implementation("androidx.navigation:navigation-compose:2.7.5")
 
-    // Firebase
-    implementation(platform("com.google.firebase:firebase-bom:32.7.0"))
-    implementation("com.google.firebase:firebase-auth-ktx")
-    implementation("com.google.firebase:firebase-firestore-ktx")
-    implementation("com.google.firebase:firebase-storage-ktx")
+    // MySQL Connector for direct database access (versão compatível com Android)
+    implementation("mysql:mysql-connector-java:5.1.49")
+
+    // DataStore for storing user ID
+    implementation("androidx.datastore:datastore-preferences:1.0.0")
 
     // Glance for Widgets
     implementation("androidx.glance:glance-appwidget:1.0.0")
+    
+    // ExifInterface for reading image orientation
+    implementation("androidx.exifinterface:exifinterface:1.3.6")
     implementation("androidx.glance:glance-material3:1.0.0")
 
     // Coil for image loading
@@ -79,6 +88,9 @@ dependencies {
 
     // WorkManager for background sync
     implementation("androidx.work:work-runtime-ktx:2.9.0")
+    
+    // Accompanist Permissions for runtime permissions
+    implementation("com.google.accompanist:accompanist-permissions:0.32.0")
 
     // Testing
     testImplementation("junit:junit:4.13.2")
