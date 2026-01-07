@@ -19,23 +19,55 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.launch
 
+/**
+ * Estados de autenticação do usuário
+ */
 sealed class AuthState {
     object Loading : AuthState()
     data class Ready(val user: User) : AuthState() // Usuário sempre pronto, não precisa de autenticação
     data class Error(val message: String) : AuthState() // Erro de conexão
 }
 
+/**
+ * Estado centralizado da UI
+ *
+ * @property authState Estado de autenticação
+ * @property currentUser Usuário atual (criado localmente)
+ * @property partner Parceiro pareado (null se não pareado)
+ * @property latestPhoto Metadados da última foto recebida
+ * @property latestPhotoUri URI da imagem em cache local
+ * @property isLoading Indicador de carregamento
+ * @property error Mensagem de erro (null se sem erro)
+ * @property successMessage Mensagem de sucesso temporária
+ */
 data class MainUiState(
     val authState: AuthState = AuthState.Loading,
     val currentUser: User? = null,
     val partner: User? = null,
     val latestPhoto: Photo? = null,
-    val latestPhotoUri: Uri? = null, // URI da imagem em cache
+    val latestPhotoUri: Uri? = null,
     val isLoading: Boolean = false,
     val error: String? = null,
-    val successMessage: String? = null // Mensagem de sucesso (ex: foto enviada)
+    val successMessage: String? = null
 )
 
+/**
+ * ViewModel principal da aplicação - gerencia todo o estado e lógica de negócio.
+ *
+ * Responsabilidades:
+ * - Gerenciar estado centralizado via StateFlow
+ * - Coordenar operações entre repositories
+ * - Polling de fotos a cada 30 segundos
+ * - Atualização de widget
+ *
+ * Fluxos principais:
+ * 1. Inicialização: loadUserData() → cria usuário local se necessário
+ * 2. Pareamento: pairWithPartner(code) → transação MySQL para parear
+ * 3. Envio: sendPhoto(uri) → upload BLOB para MySQL
+ * 4. Sincronização: startPolling() → busca fotos a cada 30s
+ *
+ * 📖 Documentação completa: .claude/COMPONENTS.md → MainViewModel
+ */
 class MainViewModel(application: Application) : AndroidViewModel(application) {
     private val context = application.applicationContext
     private val authRepository = AuthRepository(context)
