@@ -5,13 +5,13 @@ import android.net.Uri
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.glance.appwidget.GlanceAppWidgetManager
+import com.google.firebase.messaging.FirebaseMessaging
 import com.vivacomigo.app.data.model.Photo
 import com.vivacomigo.app.data.model.User
 import com.vivacomigo.app.data.repository.AuthRepository
 import com.vivacomigo.app.data.repository.PhotoRepository
 import com.vivacomigo.app.data.repository.UserRepository
 import com.vivacomigo.app.widget.PhotoWidget
-import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -57,28 +57,27 @@ data class MainUiState(
  * Responsabilidades:
  * - Gerenciar estado centralizado via StateFlow
  * - Coordenar operações entre repositories
- * - Polling de fotos a cada 30 segundos
+ * - Push notifications via FCM para sincronização em tempo real
  * - Atualização de widget
  *
  * Fluxos principais:
  * 1. Inicialização: loadUserData() → cria usuário local se necessário
- * 2. Pareamento: pairWithPartner(code) → transação MySQL para parear
- * 3. Envio: sendPhoto(uri) → upload BLOB para MySQL
- * 4. Sincronização: startPolling() → busca fotos a cada 30s
+ * 2. Pareamento: pairWithPartner(code) → transação para parear via API
+ * 3. Envio: sendPhoto(uri) → upload via API + push notification automática
+ * 4. Sincronização: FCM push → atualiza widget e UI em tempo real
  *
  * 📖 Documentação completa: .claude/COMPONENTS.md → MainViewModel
  */
 class MainViewModel(application: Application) : AndroidViewModel(application) {
     private val context = application.applicationContext
+
+    // Repositories
     private val authRepository = AuthRepository(context)
     private val userRepository = UserRepository(context)
     private val photoRepository = PhotoRepository(context)
 
     private val _uiState = MutableStateFlow(MainUiState())
     val uiState: StateFlow<MainUiState> = _uiState.asStateFlow()
-
-    private var pollingJob: Job? = null
-    private val POLLING_INTERVAL = 30_000L // 30 segundos
 
     init {
         loadUserData()
@@ -87,44 +86,113 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
     private fun loadUserData() {
         viewModelScope.launch {
             _uiState.value = _uiState.value.copy(isLoading = true)
-            
-            userRepository.getCurrentUser().fold(
-                onSuccess = { user ->
-                    _uiState.value = _uiState.value.copy(
-                        authState = AuthState.Ready(user),
-                        currentUser = user,
-                        isLoading = false
-                    )
-
-                    // Load partner if exists
-                    user.partnerId?.let { partnerId ->
-                        loadPartner(partnerId)
-                    }
-
-                    // Load latest photo
-                    loadLatestPhoto()
-
-                    // Iniciar polling
-                    startPolling()
-                },
-                onFailure = { error ->
-                    android.util.Log.e("MainViewModel", "Erro ao carregar usuário: ${error.message}", error)
-                    val errorMessage = when {
-                        error.message?.contains("Communications link failure") == true -> 
-                            "Não foi possível conectar ao servidor. Verifique sua conexão com a internet."
-                        error.message?.contains("timeout") == true -> 
-                            "Tempo de conexão esgotado. Verifique sua conexão com a internet."
-                        else -> 
-                            "Erro ao conectar: ${error.message ?: "Erro desconhecido"}"
-                    }
-                    _uiState.value = _uiState.value.copy(
-                        authState = AuthState.Error(errorMessage),
-                        isLoading = false,
-                        error = errorMessage
-                    )
-                }
-            )
+            loadUserDataFromApi()
         }
+    }
+
+    private suspend fun loadUserDataFromApi() {
+        try {
+            // Check if already has auth token
+            val token = authRepository.getAuthToken()
+
+            if (token != null) {
+                // Try to get current user
+                userRepository.getCurrentUser().fold(
+                    onSuccess = { user ->
+                        onUserLoaded(user)
+                    },
+                    onFailure = {
+                        // Token invalid or expired, need to re-login
+                        android.util.Log.w("MainViewModel", "Token invalid, need to register/login")
+                        _uiState.value = _uiState.value.copy(
+                            isLoading = false,
+                            error = "Sessão expirada. Por favor, registre-se novamente."
+                        )
+                    }
+                )
+            } else {
+                // No token, need to register
+                // Auto-register with a default name for now
+                val defaultName = "Usuario_${System.currentTimeMillis() % 10000}"
+                android.util.Log.d("MainViewModel", "No token found, auto-registering with name: $defaultName")
+
+                authRepository.registerSimple(defaultName).fold(
+                    onSuccess = { user ->
+                        android.util.Log.d("MainViewModel", "Auto-registration successful")
+                        onUserLoaded(user)
+                    },
+                    onFailure = { error ->
+                        android.util.Log.e("MainViewModel", "Auto-registration failed: ${error.message}", error)
+                        handleLoadError(error)
+                    }
+                )
+            }
+        } catch (e: Exception) {
+            android.util.Log.e("MainViewModel", "Error loading user from API: ${e.message}", e)
+            handleLoadError(e)
+        }
+    }
+
+
+    private suspend fun onUserLoaded(user: User) {
+        _uiState.value = _uiState.value.copy(
+            authState = AuthState.Ready(user),
+            currentUser = user,
+            isLoading = false
+        )
+
+        // Load partner if exists
+        user.partnerId?.let { partnerId ->
+            loadPartner(partnerId)
+        }
+
+        // Load latest photo
+        loadLatestPhoto()
+
+        // Register FCM token
+        registerFcmToken()
+    }
+
+    private fun registerFcmToken() {
+        viewModelScope.launch {
+            try {
+                FirebaseMessaging.getInstance().token.addOnSuccessListener { token ->
+                    viewModelScope.launch {
+                        userRepository.updateFcmToken(token).fold(
+                            onSuccess = {
+                                android.util.Log.d("MainViewModel", "FCM token registrado com sucesso")
+                            },
+                            onFailure = { error ->
+                                android.util.Log.e("MainViewModel", "Erro ao registrar FCM token", error)
+                            }
+                        )
+                    }
+                }.addOnFailureListener { error ->
+                    android.util.Log.e("MainViewModel", "Erro ao obter FCM token", error)
+                }
+            } catch (e: Exception) {
+                android.util.Log.e("MainViewModel", "Erro ao registrar FCM token", e)
+            }
+        }
+    }
+
+    private fun handleLoadError(error: Throwable) {
+        android.util.Log.e("MainViewModel", "Erro ao carregar usuário: ${error.message}", error)
+        val errorMessage = when {
+            error.message?.contains("Communications link failure") == true ->
+                "Não foi possível conectar ao servidor. Verifique sua conexão com a internet."
+            error.message?.contains("timeout") == true ->
+                "Tempo de conexão esgotado. Verifique sua conexão com a internet."
+            error.message?.contains("Failed to connect") == true ->
+                "Não foi possível conectar ao servidor. Verifique sua conexão com a internet."
+            else ->
+                "Erro ao conectar: ${error.message ?: "Erro desconhecido"}"
+        }
+        _uiState.value = _uiState.value.copy(
+            authState = AuthState.Error(errorMessage),
+            isLoading = false,
+            error = errorMessage
+        )
     }
     
     fun retryConnection() {
@@ -148,25 +216,19 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
         viewModelScope.launch {
             try {
                 val currentUser = _uiState.value.currentUser ?: return@launch
+
                 val photo = photoRepository.getLatestPhotoForUser(currentUser.id)
-                
-                // Buscar imagem BLOB e converter para URI
+
+                // Download and cache photo
                 val photoUri = photo?.let { p ->
                     try {
-                        val imageBytes = photoRepository.getPhotoImage(p.id, currentUser.id)
-                        imageBytes?.let { bytes ->
-                            com.vivacomigo.app.data.repository.ImageHelper.saveImageToCache(
-                                context,
-                                bytes,
-                                p.id
-                            )
-                        }
+                        photoRepository.downloadAndCachePhoto(p.id, currentUser.id)
                     } catch (e: Exception) {
                         android.util.Log.e("MainViewModel", "Erro ao carregar imagem: ${e.message}", e)
                         null
                     }
                 }
-                
+
                 _uiState.value = _uiState.value.copy(
                     latestPhoto = photo,
                     latestPhotoUri = photoUri
@@ -174,18 +236,6 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
             } catch (e: Exception) {
                 android.util.Log.e("MainViewModel", "Erro ao carregar última foto: ${e.message}", e)
                 // Não atualizar o estado em caso de erro para não quebrar a UI
-            }
-        }
-    }
-
-    private fun startPolling() {
-        pollingJob?.cancel()
-        pollingJob = viewModelScope.launch {
-            while (true) {
-                delay(POLLING_INTERVAL)
-                if (_uiState.value.authState is AuthState.Ready) {
-                    loadLatestPhoto()
-                }
             }
         }
     }
@@ -288,16 +338,13 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
                 onSuccess = { updatedUser ->
                     _uiState.value = _uiState.value.copy(
                         authState = AuthState.Ready(updatedUser), // Atualizar authState também!
-                        currentUser = updatedUser,
-                        partner = null,
-                        isLoading = false,
-                        error = null
-                    )
-                    // Parar polling
-                    pollingJob?.cancel()
-                    pollingJob = null
-                    // Atualizar widget
-                    updateWidget()
+                    currentUser = updatedUser,
+                    partner = null,
+                    isLoading = false,
+                    error = null
+                )
+                // Atualizar widget
+                updateWidget()
                 },
                 onFailure = { error ->
                     _uiState.value = _uiState.value.copy(
@@ -328,6 +375,6 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
 
     override fun onCleared() {
         super.onCleared()
-        pollingJob?.cancel()
+        // Cleanup if needed
     }
 }

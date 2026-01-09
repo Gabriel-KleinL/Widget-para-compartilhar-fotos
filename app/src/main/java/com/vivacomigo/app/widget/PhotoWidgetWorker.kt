@@ -6,7 +6,6 @@ import androidx.work.CoroutineWorker
 import androidx.work.WorkerParameters
 import com.vivacomigo.app.data.repository.AuthRepository
 import com.vivacomigo.app.data.repository.PhotoRepository
-import com.vivacomigo.app.data.repository.UserRepository
 
 class PhotoWidgetWorker(
     private val context: Context,
@@ -14,17 +13,16 @@ class PhotoWidgetWorker(
 ) : CoroutineWorker(context, params) {
 
     override suspend fun doWork(): Result {
-        val authRepository = AuthRepository(context)
-        
-        // Garantir que existe um usuário local
-        val userResult = authRepository.ensureLocalUser()
-        val userId = userResult.getOrNull()?.id ?: return Result.failure()
-
-        val photoRepository = PhotoRepository(context)
-
         return try {
+            val userId = getUserIdFromApi()
+
+            if (userId == null) {
+                return Result.failure()
+            }
+
             // Get latest photo
-            val photo = photoRepository.getLatestPhotoForUser(userId)
+            val photoRepositoryApi = PhotoRepository(context)
+            val photo = photoRepositoryApi.getLatestPhotoForUser(userId)
 
             // Save photo ID to DataStore
             photo?.id?.let { photoId ->
@@ -42,7 +40,13 @@ class PhotoWidgetWorker(
 
             Result.success()
         } catch (e: Exception) {
+            android.util.Log.e("PhotoWidgetWorker", "Error: ${e.message}", e)
             Result.retry()
         }
+    }
+
+    private suspend fun getUserIdFromApi(): String? {
+        val authRepositoryApi = AuthRepository(context)
+        return authRepositoryApi.getCurrentUserId()
     }
 }

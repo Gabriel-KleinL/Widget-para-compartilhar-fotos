@@ -7,120 +7,210 @@ import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
-import com.vivacomigo.app.data.database.DatabaseHelper
+import com.vivacomigo.app.data.api.*
 import com.vivacomigo.app.data.model.User
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
-import java.sql.ResultSet
-import kotlin.random.Random
 
-private val Context.dataStore: DataStore<Preferences> by preferencesDataStore(name = "auth_prefs")
+private val Context.authApiDataStore: DataStore<Preferences> by preferencesDataStore(name = "auth_api_prefs")
 private val USER_ID_KEY = stringPreferencesKey("user_id")
+private val AUTH_TOKEN_KEY = stringPreferencesKey("auth_token")
+private val DISPLAY_NAME_KEY = stringPreferencesKey("display_name")
 
 class AuthRepository(private val context: Context) {
-    
-    private fun generatePairingCode(): String {
-        val chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
-        return (1..6)
-            .map { chars[Random.nextInt(chars.length)] }
-            .joinToString("")
+
+    private val apiService = RetrofitClient.apiService
+
+    /**
+     * Get the stored auth token
+     */
+    suspend fun getAuthToken(): String? {
+        return context.authApiDataStore.data.map { preferences ->
+            preferences[AUTH_TOKEN_KEY]
+        }.first()
     }
-    
+
+    /**
+     * Get the current user ID
+     */
     suspend fun getCurrentUserId(): String? {
-        return context.dataStore.data.map { preferences ->
+        return context.authApiDataStore.data.map { preferences ->
             preferences[USER_ID_KEY]
         }.first()
     }
-    
-    private suspend fun saveUserId(userId: String) {
-        context.dataStore.edit { preferences ->
+
+    /**
+     * Get the stored display name
+     */
+    suspend fun getDisplayName(): String? {
+        return context.authApiDataStore.data.map { preferences ->
+            preferences[DISPLAY_NAME_KEY]
+        }.first()
+    }
+
+    /**
+     * Save authentication data to DataStore
+     */
+    private suspend fun saveAuthData(userId: String, token: String, displayName: String) {
+        context.authApiDataStore.edit { preferences ->
             preferences[USER_ID_KEY] = userId
+            preferences[AUTH_TOKEN_KEY] = token
+            preferences[DISPLAY_NAME_KEY] = displayName
         }
     }
-    
+
     /**
-     * Garante que existe um usuário local criado no banco de dados.
-     * Se não existir, cria automaticamente com ID único e código de pareamento.
+     * Clear all authentication data
+     */
+    suspend fun clearAuthData() {
+        context.authApiDataStore.edit { preferences ->
+            preferences.clear()
+        }
+    }
+
+    /**
+     * Register a new user with simple display name (no password)
+     */
+    suspend fun registerSimple(displayName: String): Result<User> {
+        return try {
+            Log.d("AuthRepository", "Registering user: $displayName")
+
+            val request = RegisterRequest(displayName)
+            val response = apiService.registerSimple(request)
+
+            if (response.isSuccessful && response.body() != null) {
+                val authResponse = response.body()!!
+                val apiUser = authResponse.user
+
+                // Save auth data locally
+                saveAuthData(apiUser.id, authResponse.token, apiUser.displayName)
+
+                val user = User(
+                    id = apiUser.id,
+                    email = apiUser.email ?: "",
+                    pairing_code = apiUser.pairingCode,
+                    partner_id = apiUser.partnerId,
+                    display_name = apiUser.displayName
+                )
+
+                Log.d("AuthRepository", "User registered successfully: ${user.id}")
+                Result.success(user)
+            } else {
+                val errorMsg = response.errorBody()?.string() ?: "Unknown error"
+                Log.e("AuthRepository", "Registration failed: $errorMsg")
+                Result.failure(Exception("Registration failed: $errorMsg"))
+            }
+        } catch (e: Exception) {
+            Log.e("AuthRepository", "Registration error: ${e.message}", e)
+            Result.failure(e)
+        }
+    }
+
+    /**
+     * Login with display name (no password)
+     */
+    suspend fun loginSimple(displayName: String): Result<User> {
+        return try {
+            Log.d("AuthRepository", "Logging in user: $displayName")
+
+            val request = LoginRequest(displayName)
+            val response = apiService.loginSimple(request)
+
+            if (response.isSuccessful && response.body() != null) {
+                val authResponse = response.body()!!
+                val apiUser = authResponse.user
+
+                // Save auth data locally
+                saveAuthData(apiUser.id, authResponse.token, apiUser.displayName)
+
+                val user = User(
+                    id = apiUser.id,
+                    email = apiUser.email ?: "",
+                    pairing_code = apiUser.pairingCode,
+                    partner_id = apiUser.partnerId,
+                    display_name = apiUser.displayName
+                )
+
+                Log.d("AuthRepository", "User logged in successfully: ${user.id}")
+                Result.success(user)
+            } else {
+                val errorMsg = response.errorBody()?.string() ?: "Unknown error"
+                Log.e("AuthRepository", "Login failed: $errorMsg")
+                Result.failure(Exception("Login failed: $errorMsg"))
+            }
+        } catch (e: Exception) {
+            Log.e("AuthRepository", "Login error: ${e.message}", e)
+            Result.failure(e)
+        }
+    }
+
+    /**
+     * Login with pairing code
+     */
+    suspend fun loginWithCode(pairingCode: String): Result<User> {
+        return try {
+            Log.d("AuthRepository", "Logging in with code: $pairingCode")
+
+            val request = LoginCodeRequest(pairingCode)
+            val response = apiService.loginWithCode(request)
+
+            if (response.isSuccessful && response.body() != null) {
+                val authResponse = response.body()!!
+                val apiUser = authResponse.user
+
+                // Save auth data locally
+                saveAuthData(apiUser.id, authResponse.token, apiUser.displayName)
+
+                val user = User(
+                    id = apiUser.id,
+                    email = apiUser.email ?: "",
+                    pairing_code = apiUser.pairingCode,
+                    partner_id = apiUser.partnerId,
+                    display_name = apiUser.displayName
+                )
+
+                Log.d("AuthRepository", "User logged in with code successfully: ${user.id}")
+                Result.success(user)
+            } else {
+                val errorMsg = response.errorBody()?.string() ?: "Unknown error"
+                Log.e("AuthRepository", "Login with code failed: $errorMsg")
+                Result.failure(Exception("Login with code failed: $errorMsg"))
+            }
+        } catch (e: Exception) {
+            Log.e("AuthRepository", "Login with code error: ${e.message}", e)
+            Result.failure(e)
+        }
+    }
+
+    /**
+     * Ensure local user exists (backward compatibility)
+     * This will try to get current user from API, or prompt registration
      */
     suspend fun ensureLocalUser(): Result<User> {
         return try {
-            // Verificar se já existe um usuário local salvo
-            val existingUserId = getCurrentUserId()
-            
-            if (existingUserId != null) {
-                // Tentar buscar o usuário no banco
-                val userResult = DatabaseHelper.executeQuery(
-                    "SELECT id, pairing_code, partner_id, display_name FROM users WHERE id = ?",
-                    listOf(existingUserId)
-                ) { rs ->
-                    val partnerIdValue = rs.getString("partner_id")
-                    val isPartnerIdNull = rs.wasNull()
-                    User(
-                        id = rs.getString("id") ?: "",
-                        email = "", // Não usado mais
-                        pairing_code = rs.getString("pairing_code") ?: "",
-                        partner_id = if (isPartnerIdNull) null else partnerIdValue,
-                        display_name = rs.getString("display_name") ?: "Usuário"
+            val token = getAuthToken()
+
+            if (token != null) {
+                // Try to get current user from API
+                val response = apiService.getCurrentUser("Bearer $token")
+
+                if (response.isSuccessful && response.body() != null) {
+                    val apiUser = response.body()!!
+                    val user = User(
+                        id = apiUser.id,
+                        email = apiUser.email ?: "",
+                        pairing_code = apiUser.pairingCode,
+                        partner_id = apiUser.partnerId,
+                        display_name = apiUser.displayName
                     )
-                }
-                
-                if (userResult.isSuccess) {
-                    return userResult
-                } else {
-                    // Usuário não encontrado no banco, criar novo
-                    Log.w("AuthRepository", "Usuário local não encontrado no banco, criando novo")
+                    return Result.success(user)
                 }
             }
-            
-            // Criar novo usuário local
-            var pairingCode: String
-            var isUnique = false
-            var attempts = 0
-            val maxAttempts = 20
-            
-            while (!isUnique && attempts < maxAttempts) {
-                pairingCode = generatePairingCode()
-                val checkCodeResult = DatabaseHelper.executeQuery(
-                    "SELECT id FROM users WHERE pairing_code = ?",
-                    listOf(pairingCode)
-                ) { rs -> rs.getString("id") }
-                
-                if (checkCodeResult.isFailure) {
-                    isUnique = true
-                    
-                    // Criar usuário no banco
-                    val userId = DatabaseHelper.generateUUID()
-                    val displayName = "Usuário"
-                    
-                    val insertResult = DatabaseHelper.executeUpdate(
-                        "INSERT INTO users (id, pairing_code, display_name) VALUES (?, ?, ?)",
-                        listOf(userId, pairingCode, displayName)
-                    )
-                    
-                    return insertResult.fold(
-                        onSuccess = {
-                            saveUserId(userId)
-                            val user = User(
-                                id = userId,
-                                email = "",
-                                pairing_code = pairingCode,
-                                display_name = displayName
-                            )
-                            Log.d("AuthRepository", "Usuário local criado: $userId com código: $pairingCode")
-                            Result.success(user)
-                        },
-                        onFailure = { error ->
-                            Log.e("AuthRepository", "Erro ao criar usuário local: ${error.message}", error)
-                            Result.failure(error)
-                        }
-                    )
-                }
-                attempts++
-            }
-            
-            Result.failure(Exception("Erro ao gerar código de pareamento único após $maxAttempts tentativas"))
+
+            // No token or invalid token - need to register/login
+            Result.failure(Exception("No authenticated user. Please register or login."))
         } catch (e: Exception) {
-            Log.e("AuthRepository", "Erro ao garantir usuário local: ${e.message}", e)
+            Log.e("AuthRepository", "Error ensuring local user: ${e.message}", e)
             Result.failure(e)
         }
     }

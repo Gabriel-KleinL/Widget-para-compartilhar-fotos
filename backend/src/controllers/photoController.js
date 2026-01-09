@@ -1,6 +1,9 @@
 const db = require('../config/database');
 const Photo = require('../models/Photo');
 const multer = require('multer');
+const admin = require('../config/firebase');
+const sharp = require('sharp');
+const FileType = require('file-type');
 
 // Configurar multer para armazenar em memória
 const storage = multer.memoryStorage();
@@ -46,11 +49,77 @@ async function uploadPhoto(req, res) {
             return res.status(403).json({ error: 'Você só pode enviar fotos para seu parceiro' });
         }
 
-        // Criar foto
+        // ===== FASE 5: VALIDAÇÕES DE SEGURANÇA =====
+
+        // 1. Validar magic bytes (tipo real do arquivo)
+        const fileType = await FileType.fromBuffer(req.file.buffer);
+        if (!fileType) {
+            return res.status(400).json({ error: 'Tipo de arquivo não reconhecido' });
+        }
+
+        const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png'];
+        if (!allowedTypes.includes(fileType.mime)) {
+            return res.status(400).json({
+                error: `Apenas JPEG e PNG são permitidos. Recebido: ${fileType.mime}`
+            });
+        }
+
+        // 2. Obter metadata e validar dimensões
+        let metadata;
+        try {
+            metadata = await sharp(req.file.buffer).metadata();
+        } catch (error) {
+            console.error('Erro ao ler metadata da imagem:', error);
+            return res.status(400).json({ error: 'Imagem corrompida ou inválida' });
+        }
+
+        const MAX_WIDTH = 4096;
+        const MAX_HEIGHT = 4096;
+        const MAX_PIXELS = 16_000_000; // 16 megapixels
+
+        if (metadata.width > MAX_WIDTH || metadata.height > MAX_HEIGHT) {
+            return res.status(400).json({
+                error: `Imagem muito grande. Máximo: ${MAX_WIDTH}x${MAX_HEIGHT}px. Recebido: ${metadata.width}x${metadata.height}px`
+            });
+        }
+
+        if (metadata.width * metadata.height > MAX_PIXELS) {
+            return res.status(400).json({
+                error: `Imagem tem muitos pixels. Máximo: 16MP. Recebido: ${(metadata.width * metadata.height / 1_000_000).toFixed(1)}MP`
+            });
+        }
+
+        // 3. Processar imagem: remover EXIF, otimizar, redimensionar se necessário
+        let processedImageBuffer;
+        try {
+            const originalSize = req.file.buffer.length;
+            console.log(`📸 Processando imagem: ${metadata.width}x${metadata.height} (${(originalSize / 1024).toFixed(0)}KB)`);
+
+            processedImageBuffer = await sharp(req.file.buffer)
+                .rotate() // Auto-rotaciona baseado em EXIF antes de remover
+                .resize(1920, 1920, {
+                    fit: 'inside',
+                    withoutEnlargement: true
+                })
+                .jpeg({
+                    quality: 85,
+                    progressive: true
+                })
+                .toBuffer();
+
+            const processedSize = processedImageBuffer.length;
+            const reduction = ((1 - processedSize / originalSize) * 100).toFixed(0);
+            console.log(`✅ Imagem processada: ${(processedSize / 1024).toFixed(0)}KB (redução de ${reduction}%)`);
+        } catch (error) {
+            console.error('Erro ao processar imagem:', error);
+            return res.status(500).json({ error: 'Erro ao processar imagem' });
+        }
+
+        // Criar foto (com imagem processada)
         const photo = new Photo({
             sender_id: senderId,
             receiver_id: receiverId,
-            image_data: req.file.buffer,
+            image_data: processedImageBuffer, // Usa imagem processada (sem EXIF, otimizada)
             timestamp: Date.now()
         });
 
@@ -58,6 +127,42 @@ async function uploadPhoto(req, res) {
             'INSERT INTO photos (id, sender_id, receiver_id, image_data, timestamp, seen) VALUES (?, ?, ?, ?, ?, ?)',
             [photo.id, photo.sender_id, photo.receiver_id, photo.image_data, photo.timestamp, photo.seen]
         );
+
+        // Enviar push notification para o receiver
+        if (admin) {
+            try {
+                // Buscar FCM token do receiver
+                const [receivers] = await db.execute(
+                    'SELECT fcm_token FROM users WHERE id = ?',
+                    [receiverId]
+                );
+
+                if (receivers.length > 0 && receivers[0].fcm_token) {
+                    const fcmToken = receivers[0].fcm_token;
+                    
+                    // Enviar notificação push
+                    await admin.messaging().send({
+                        token: fcmToken,
+                        notification: {
+                            title: "Nova foto recebida! ❤️",
+                            body: "Você recebeu uma nova foto especial"
+                        },
+                        data: {
+                            photo_id: photo.id,
+                            sender_id: senderId,
+                            type: 'new_photo'
+                        },
+                        android: {
+                            priority: 'high'
+                        }
+                    });
+                    console.log('✅ Push notification enviada com sucesso para', receiverId);
+                }
+            } catch (error) {
+                console.error('⚠️  Erro ao enviar push notification:', error.message);
+                // Não falhar o upload se push falhar
+            }
+        }
 
         res.status(201).json(photo.toJSON());
     } catch (error) {

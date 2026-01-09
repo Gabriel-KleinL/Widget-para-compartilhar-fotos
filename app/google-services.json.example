@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "SEU_PROJECT_NUMBER",
+    "project_id": "viva-comigo-app",
+    "storage_bucket": "viva-comigo-app.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "SEU_MOBILESDK_APP_ID",
+        "android_client_info": {
+          "package_name": "com.vivacomigo.app"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "SUA_API_KEY"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

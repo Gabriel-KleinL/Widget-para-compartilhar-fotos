@@ -1,169 +1,260 @@
 package com.vivacomigo.app.data.repository
 
 import android.content.Context
-import com.vivacomigo.app.data.database.DatabaseHelper
+import android.util.Log
+import com.vivacomigo.app.data.api.FcmTokenRequest
+import com.vivacomigo.app.data.api.PairRequest
+import com.vivacomigo.app.data.api.RetrofitClient
 import com.vivacomigo.app.data.model.User
-import java.sql.ResultSet
 
 class UserRepository(private val context: Context) {
-    
-    private fun mapUserFromResultSet(rs: ResultSet): User {
-        val partnerIdValue = rs.getString("partner_id")
-        val isPartnerIdNull = rs.wasNull()
-        return User(
-            id = rs.getString("id") ?: "",
-            email = "", // Não usado mais, mantido para compatibilidade
-            pairing_code = rs.getString("pairing_code") ?: "",
-            partner_id = if (isPartnerIdNull) null else partnerIdValue,
-            display_name = rs.getString("display_name") ?: "Usuário"
-        )
-    }
-    
+
+    private val apiService = RetrofitClient.apiService
+    private val authRepo = AuthRepository(context)
+
+    /**
+     * Get user by ID
+     */
     suspend fun getUser(userId: String): Result<User> {
-        return DatabaseHelper.executeQuery(
-            "SELECT id, pairing_code, partner_id, display_name FROM users WHERE id = ?",
-            listOf(userId),
-            ::mapUserFromResultSet
-        )
-    }
-    
-    suspend fun getCurrentUser(): Result<User> {
-        val authRepo = AuthRepository(context)
-        // Garantir que existe um usuário local
-        return authRepo.ensureLocalUser()
-    }
-    
-    suspend fun findUserByPairingCode(code: String): Result<User> {
-        val cleanCode = code.trim().uppercase()
-        return DatabaseHelper.executeQuery(
-            "SELECT id, pairing_code, partner_id, display_name FROM users WHERE UPPER(TRIM(pairing_code)) = ?",
-            listOf(cleanCode),
-            ::mapUserFromResultSet
-        )
-    }
-    
-    suspend fun pairUsers(userId: String, partnerCode: String): Result<User> {
         return try {
-            android.util.Log.d("UserRepository", "pairUsers chamado - userId: $userId, partnerCode: $partnerCode")
-            val cleanCode = partnerCode.trim().uppercase()
-            
-            if (cleanCode.isEmpty()) {
-                android.util.Log.w("UserRepository", "Código vazio")
-                return Result.failure(Exception("Código de pareamento não pode estar vazio"))
+            val token = authRepo.getAuthToken()
+            if (token == null) {
+                return Result.failure(Exception("No authentication token found"))
             }
-            
-            android.util.Log.d("UserRepository", "Buscando parceiro com código: $cleanCode")
-            // Buscar parceiro pelo código
-            val partnerResult = findUserByPairingCode(cleanCode)
-            
-            return partnerResult.fold(
-                onSuccess = { partner ->
-                    android.util.Log.d("UserRepository", "Parceiro encontrado: ${partner.id}, pairing_code: ${partner.pairingCode}")
-                    
-                    if (partner.id == userId) {
-                        android.util.Log.w("UserRepository", "Tentativa de parear consigo mesmo")
-                        return@fold Result.failure(Exception("Você não pode parear consigo mesmo!"))
-                    }
-                    
-                    // Verificar se já está pareado
-                    if (partner.partnerId != null && partner.partnerId != userId) {
-                        android.util.Log.w("UserRepository", "Parceiro já está pareado com outro usuário")
-                        return@fold Result.failure(Exception("Este usuário já está pareado com outro parceiro"))
-                    }
-                    
-                    android.util.Log.d("UserRepository", "Iniciando transação de pareamento...")
-                    // Parear usuários em transação
-                    val transactionResult = DatabaseHelper.executeTransaction { connection ->
-                        android.util.Log.d("UserRepository", "Atualizando usuário atual ($userId) com partner_id = ${partner.id}")
-                        val stmt1 = connection.prepareStatement("UPDATE users SET partner_id = ? WHERE id = ?")
-                        stmt1.setString(1, partner.id)
-                        stmt1.setString(2, userId)
-                        val rows1 = stmt1.executeUpdate()
-                        android.util.Log.d("UserRepository", "UPDATE 1 executado: $rows1 linha(s) atualizada(s)")
-                        stmt1.close()
-                        
-                        if (rows1 == 0) {
-                            android.util.Log.e("UserRepository", "Nenhuma linha atualizada para usuário atual")
-                            throw Exception("Erro ao atualizar usuário atual")
-                        }
-                        
-                        android.util.Log.d("UserRepository", "Atualizando parceiro (${partner.id}) com partner_id = $userId")
-                        val stmt2 = connection.prepareStatement("UPDATE users SET partner_id = ? WHERE id = ?")
-                        stmt2.setString(1, userId)
-                        stmt2.setString(2, partner.id)
-                        val rows2 = stmt2.executeUpdate()
-                        android.util.Log.d("UserRepository", "UPDATE 2 executado: $rows2 linha(s) atualizada(s)")
-                        stmt2.close()
-                        
-                        if (rows2 == 0) {
-                            android.util.Log.e("UserRepository", "Nenhuma linha atualizada para parceiro")
-                            throw Exception("Erro ao atualizar parceiro")
-                        }
-                        
-                        android.util.Log.d("UserRepository", "Ambos os UPDATEs executados com sucesso. Aguardando commit...")
-                    }
-                    
-                    transactionResult.fold(
-                        onSuccess = {
-                            android.util.Log.d("UserRepository", "Buscando usuário atualizado...")
-                            // Retornar usuário atualizado
-                            getUser(userId)
-                        },
-                        onFailure = { error ->
-                            android.util.Log.e("UserRepository", "Erro na transação: ${error.message}", error)
-                            Result.failure(error)
-                        }
-                    )
-                },
-                onFailure = { error ->
-                    android.util.Log.e("UserRepository", "Parceiro não encontrado: ${error.message}", error)
-                    Result.failure(Exception("Código de pareamento não encontrado. Verifique se o código está correto."))
-                }
-            )
+
+            val response = apiService.getUserById("Bearer $token", userId)
+
+            if (response.isSuccessful && response.body() != null) {
+                val apiUser = response.body()!!
+                val user = User(
+                    id = apiUser.id,
+                    email = apiUser.email ?: "",
+                    pairing_code = apiUser.pairingCode,
+                    partner_id = apiUser.partnerId,
+                    display_name = apiUser.displayName
+                )
+                Result.success(user)
+            } else {
+                val errorMsg = response.errorBody()?.string() ?: "Unknown error"
+                Log.e("UserRepository", "Failed to get user: $errorMsg")
+                Result.failure(Exception("Failed to get user: $errorMsg"))
+            }
         } catch (e: Exception) {
-            android.util.Log.e("UserRepository", "Erro ao parear usuários: ${e.message}", e)
+            Log.e("UserRepository", "Error getting user: ${e.message}", e)
             Result.failure(e)
         }
     }
-    
+
+    /**
+     * Get current authenticated user
+     */
+    suspend fun getCurrentUser(): Result<User> {
+        return try {
+            val token = authRepo.getAuthToken()
+            if (token == null) {
+                return Result.failure(Exception("No authentication token found"))
+            }
+
+            val response = apiService.getCurrentUser("Bearer $token")
+
+            if (response.isSuccessful && response.body() != null) {
+                val apiUser = response.body()!!
+                val user = User(
+                    id = apiUser.id,
+                    email = apiUser.email ?: "",
+                    pairing_code = apiUser.pairingCode,
+                    partner_id = apiUser.partnerId,
+                    display_name = apiUser.displayName
+                )
+                Log.d("UserRepository", "Current user retrieved: ${user.id}")
+                Result.success(user)
+            } else {
+                val errorMsg = response.errorBody()?.string() ?: "Unknown error"
+                Log.e("UserRepository", "Failed to get current user: $errorMsg")
+                Result.failure(Exception("Failed to get current user: $errorMsg"))
+            }
+        } catch (e: Exception) {
+            Log.e("UserRepository", "Error getting current user: ${e.message}", e)
+            Result.failure(e)
+        }
+    }
+
+    /**
+     * Find user by pairing code
+     */
+    suspend fun findUserByPairingCode(code: String): Result<User> {
+        return try {
+            val token = authRepo.getAuthToken()
+            if (token == null) {
+                return Result.failure(Exception("No authentication token found"))
+            }
+
+            val cleanCode = code.trim().uppercase()
+            if (cleanCode.isEmpty()) {
+                return Result.failure(Exception("Código de pareamento não pode estar vazio"))
+            }
+
+            val response = apiService.getUserByPairingCode("Bearer $token", cleanCode)
+
+            if (response.isSuccessful && response.body() != null) {
+                val apiUser = response.body()!!
+                val user = User(
+                    id = apiUser.id,
+                    email = apiUser.email ?: "",
+                    pairing_code = apiUser.pairingCode,
+                    partner_id = apiUser.partnerId,
+                    display_name = apiUser.displayName
+                )
+                Log.d("UserRepository", "User found with code $cleanCode: ${user.id}")
+                Result.success(user)
+            } else {
+                val errorMsg = response.errorBody()?.string() ?: "Unknown error"
+                Log.e("UserRepository", "Failed to find user by code: $errorMsg")
+                Result.failure(Exception("Código de pareamento não encontrado. Verifique se o código está correto."))
+            }
+        } catch (e: Exception) {
+            Log.e("UserRepository", "Error finding user by code: ${e.message}", e)
+            Result.failure(e)
+        }
+    }
+
+    /**
+     * Pair current user with another user by partner code
+     */
+    suspend fun pairUsers(userId: String, partnerCode: String): Result<User> {
+        return try {
+            Log.d("UserRepository", "Pairing users - userId: $userId, partnerCode: $partnerCode")
+
+            val token = authRepo.getAuthToken()
+            if (token == null) {
+                return Result.failure(Exception("No authentication token found"))
+            }
+
+            val cleanCode = partnerCode.trim().uppercase()
+            if (cleanCode.isEmpty()) {
+                Log.w("UserRepository", "Empty code")
+                return Result.failure(Exception("Código de pareamento não pode estar vazio"))
+            }
+
+            // Verify partner exists first
+            val partnerResult = findUserByPairingCode(cleanCode)
+            if (partnerResult.isFailure) {
+                return partnerResult
+            }
+
+            val partner = partnerResult.getOrNull()!!
+
+            // Check if trying to pair with self
+            if (partner.id == userId) {
+                Log.w("UserRepository", "Attempting to pair with self")
+                return Result.failure(Exception("Você não pode parear consigo mesmo!"))
+            }
+
+            // Check if partner is already paired with someone else
+            if (partner.partnerId != null && partner.partnerId != userId) {
+                Log.w("UserRepository", "Partner already paired with someone else")
+                return Result.failure(Exception("Este usuário já está pareado com outro parceiro"))
+            }
+
+            // Send pair request to API
+            val pairRequest = PairRequest(cleanCode)
+            val response = apiService.pairWithPartner("Bearer $token", pairRequest)
+
+            if (response.isSuccessful && response.body() != null) {
+                val apiUser = response.body()!!
+                val user = User(
+                    id = apiUser.id,
+                    email = apiUser.email ?: "",
+                    pairing_code = apiUser.pairingCode,
+                    partner_id = apiUser.partnerId,
+                    display_name = apiUser.displayName
+                )
+                Log.d("UserRepository", "Pairing successful: ${user.id} paired with ${user.partner_id}")
+                Result.success(user)
+            } else {
+                val errorMsg = response.errorBody()?.string() ?: "Unknown error"
+                Log.e("UserRepository", "Pairing failed: $errorMsg")
+                Result.failure(Exception("Falha ao parear: $errorMsg"))
+            }
+        } catch (e: Exception) {
+            Log.e("UserRepository", "Error pairing users: ${e.message}", e)
+            Result.failure(e)
+        }
+    }
+
+    /**
+     * Unpair current user from their partner
+     */
     suspend fun unpairUsers(userId: String): Result<User> {
         return try {
-            // Buscar parceiro atual antes da transação
-            val currentUserResult = getUser(userId)
-            val currentUser = currentUserResult.getOrNull()
-            val partnerId = currentUser?.partnerId
-            
-            if (partnerId == null) {
-                // Já não está pareado
-                return Result.success(currentUser ?: return Result.failure(Exception("Usuário não encontrado")))
+            Log.d("UserRepository", "Unpairing user: $userId")
+
+            val token = authRepo.getAuthToken()
+            if (token == null) {
+                return Result.failure(Exception("No authentication token found"))
             }
-            
-            // Desparear usuários em transação
-            val transactionResult = DatabaseHelper.executeTransaction { connection ->
-                // Remover pareamento do usuário atual
-                val stmt1 = connection.prepareStatement("UPDATE users SET partner_id = NULL WHERE id = ?")
-                stmt1.setString(1, userId)
-                stmt1.executeUpdate()
-                stmt1.close()
-                
-                // Remover pareamento do parceiro
-                val stmt2 = connection.prepareStatement("UPDATE users SET partner_id = NULL WHERE id = ?")
-                stmt2.setString(1, partnerId)
-                stmt2.executeUpdate()
-                stmt2.close()
+
+            // Check if user is paired
+            val currentUserResult = getCurrentUser()
+            if (currentUserResult.isFailure) {
+                return currentUserResult
             }
-            
-            return transactionResult.fold(
-                onSuccess = {
-                    // Retornar usuário atualizado
-                    getUser(userId)
-                },
-                onFailure = { error ->
-                    Result.failure(error)
-                }
-            )
+
+            val currentUser = currentUserResult.getOrNull()!!
+            if (currentUser.partner_id == null) {
+                // Already unpaired
+                Log.d("UserRepository", "User already not paired")
+                return Result.success(currentUser)
+            }
+
+            // Send unpair request to API
+            val response = apiService.unpairPartner("Bearer $token")
+
+            if (response.isSuccessful && response.body() != null) {
+                val apiUser = response.body()!!
+                val user = User(
+                    id = apiUser.id,
+                    email = apiUser.email ?: "",
+                    pairing_code = apiUser.pairingCode,
+                    partner_id = apiUser.partnerId,
+                    display_name = apiUser.displayName
+                )
+                Log.d("UserRepository", "Unpairing successful: ${user.id}")
+                Result.success(user)
+            } else {
+                val errorMsg = response.errorBody()?.string() ?: "Unknown error"
+                Log.e("UserRepository", "Unpairing failed: $errorMsg")
+                Result.failure(Exception("Falha ao desparear: $errorMsg"))
+            }
         } catch (e: Exception) {
-            android.util.Log.e("UserRepository", "Erro ao desparar usuários: ${e.message}", e)
+            Log.e("UserRepository", "Error unpairing users: ${e.message}", e)
+            Result.failure(e)
+        }
+    }
+
+    /**
+     * Update FCM token for push notifications
+     */
+    suspend fun updateFcmToken(fcmToken: String): Result<Unit> {
+        return try {
+            val token = authRepo.getAuthToken()
+            if (token == null) {
+                return Result.failure(Exception("No authentication token found"))
+            }
+
+            val request = FcmTokenRequest(fcmToken)
+            val response = apiService.updateFcmToken("Bearer $token", request)
+
+            if (response.isSuccessful) {
+                Log.d("UserRepository", "FCM token updated successfully")
+                Result.success(Unit)
+            } else {
+                val errorMsg = response.errorBody()?.string() ?: "Unknown error"
+                Log.e("UserRepository", "Failed to update FCM token: $errorMsg")
+                Result.failure(Exception("Failed to update FCM token"))
+            }
+        } catch (e: Exception) {
+            Log.e("UserRepository", "Error updating FCM token: ${e.message}", e)
             Result.failure(e)
         }
     }

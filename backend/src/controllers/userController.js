@@ -131,10 +131,94 @@ async function pairUsers(req, res) {
     }
 }
 
+// Desparear usuários
+async function unpairUsers(req, res) {
+    try {
+        const currentUserId = req.user.id;
+
+        // Buscar parceiro atual
+        const [users] = await db.execute(
+            'SELECT partner_id FROM users WHERE id = ?',
+            [currentUserId]
+        );
+
+        if (users.length === 0) {
+            return res.status(404).json({ error: 'Usuário não encontrado' });
+        }
+
+        const partnerId = users[0].partner_id;
+
+        if (!partnerId) {
+            return res.status(400).json({ error: 'Você não está pareado com ninguém' });
+        }
+
+        // Desparear (transação)
+        const connection = await db.getConnection();
+        try {
+            await connection.beginTransaction();
+
+            // Remover parceiro do usuário atual
+            await connection.execute(
+                'UPDATE users SET partner_id = NULL WHERE id = ?',
+                [currentUserId]
+            );
+
+            // Remover parceiro do outro usuário
+            await connection.execute(
+                'UPDATE users SET partner_id = NULL WHERE id = ?',
+                [partnerId]
+            );
+
+            await connection.commit();
+
+            // Buscar usuário atualizado
+            const [updatedUsers] = await db.execute(
+                'SELECT * FROM users WHERE id = ?',
+                [currentUserId]
+            );
+
+            const updatedUser = User.fromRow(updatedUsers[0]);
+            res.json(updatedUser.toJSON());
+        } catch (error) {
+            await connection.rollback();
+            throw error;
+        } finally {
+            connection.release();
+        }
+    } catch (error) {
+        console.error('Erro ao desparear usuários:', error);
+        res.status(500).json({ error: 'Erro ao desparear usuários' });
+    }
+}
+
+// Atualizar FCM token
+async function updateFcmToken(req, res) {
+    try {
+        const userId = req.user.id;
+        const { fcmToken } = req.body;
+
+        if (!fcmToken) {
+            return res.status(400).json({ error: 'FCM token é obrigatório' });
+        }
+
+        await db.execute(
+            'UPDATE users SET fcm_token = ? WHERE id = ?',
+            [fcmToken, userId]
+        );
+
+        res.json({ message: 'FCM token atualizado com sucesso' });
+    } catch (error) {
+        console.error('Erro ao atualizar FCM token:', error);
+        res.status(500).json({ error: 'Erro ao atualizar FCM token' });
+    }
+}
+
 module.exports = {
     getCurrentUser,
     getUserById,
     getUserByPairingCode,
-    pairUsers
+    pairUsers,
+    unpairUsers,
+    updateFcmToken
 };
 

@@ -1,10 +1,10 @@
 {
     "logs": [
         {
-            "outputFile": "com.vivacomigo.app-mergeDebugResources-64:/values-night-v8/values-night-v8.xml",
+            "outputFile": "com.vivacomigo.app-mergeDebugResources-70:/values-night-v8/values-night-v8.xml",
             "map": [
                 {
-                    "source": "/home/gabriel/.gradle/caches/transforms-3/27a27317064cbcd21262bb6ae91b7bad/transformed/jetified-glance-1.0.0/res/values-night-v8/values-night-v8.xml",
+                    "source": "/Users/gabrielkleinlima/.gradle/caches/transforms-3/4b86db807cfb4495afb844c7ffc7df46/transformed/jetified-glance-1.0.0/res/values-night-v8/values-night-v8.xml",
                     "from": {
                         "startLines": "2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27",
                         "startColumns": "4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4",

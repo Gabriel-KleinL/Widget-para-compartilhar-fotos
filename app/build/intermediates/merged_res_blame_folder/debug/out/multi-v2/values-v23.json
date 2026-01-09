@@ -1,10 +1,10 @@
 {
     "logs": [
         {
-            "outputFile": "com.vivacomigo.app-mergeDebugResources-64:/values-v23/values-v23.xml",
+            "outputFile": "com.vivacomigo.app-mergeDebugResources-70:/values-v23/values-v23.xml",
             "map": [
                 {
-                    "source": "/home/gabriel/.gradle/caches/transforms-3/ccd5f21dd1cca20e175d7945102f2f01/transformed/jetified-glance-appwidget-1.0.0/res/values-v23/values-v23.xml",
+                    "source": "/Users/gabrielkleinlima/.gradle/caches/transforms-3/4ad8e330d5e021bfeddc56e235ceb7f5/transformed/jetified-glance-appwidget-1.0.0/res/values-v23/values-v23.xml",
                     "from": {
                         "startLines": "2",
                         "startColumns": "4",
@@ -21,7 +21,7 @@
                     }
                 },
                 {
-                    "source": "/home/gabriel/.gradle/caches/transforms-3/795cfc56b0370abf8ccaac2477cf15fd/transformed/work-runtime-2.9.0/res/values-v23/values-v23.xml",
+                    "source": "/Users/gabrielkleinlima/.gradle/caches/transforms-3/17ec5046c13aa5959a15e8e2d50b7e74/transformed/work-runtime-2.9.0/res/values-v23/values-v23.xml",
                     "from": {
                         "startLines": "2,3",
                         "startColumns": "4,4",
